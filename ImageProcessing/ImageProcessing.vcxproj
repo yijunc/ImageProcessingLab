@@ -182,9 +182,6 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <Text Include="ReadMe.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="CDib.h" />
     <ClInclude Include="ClassView.h" />
     <ClInclude Include="FileView.h" />
