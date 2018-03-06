@@ -30,6 +30,10 @@ BEGIN_MESSAGE_MAP(CImageProcessingView, CView)
 	ON_WM_RBUTTONUP()
 	ON_COMMAND(ID_OPEN, &CImageProcessingView::OnOpen)
 	ON_COMMAND(ID_RED_BLUE, &CImageProcessingView::OnRedBlue)
+	ON_COMMAND(ID_CLOSE_SECOND, &CImageProcessingView::OnCloseSecond)
+	ON_COMMAND(ID_SAVE, &CImageProcessingView::OnSave)
+	ON_COMMAND(ID_CLOSE, &CImageProcessingView::OnClose)
+	ON_COMMAND(ID_OPEN_SECOND, &CImageProcessingView::OnOpenSecond)
 END_MESSAGE_MAP()
 
 // CImageProcessingView ¹¹Ôì/Îö¹¹
@@ -61,6 +65,7 @@ void CImageProcessingView::OnDraw(CDC* pDC)
 	if (!pDoc)
 		return;
 	mybmp.Draw(pDC, CPoint(0, 0), sizeDibDisplay);
+	mybmp2.Draw(pDC, CPoint(sizeDibDisplay.cx, 0), sizeDibDisplay2);
 }
 
 
@@ -188,6 +193,61 @@ void CImageProcessingView::OnRedBlue()
 
 		}
 	}
-	mybmp.Save("1111.bmp");
+	Invalidate(TRUE);
+}
+
+
+void CImageProcessingView::OnCloseSecond()
+{
+	// TODO: Add your command handler code here
+	mybmp2.Empty();
+	Invalidate(TRUE);
+}
+
+
+void CImageProcessingView::OnSave()
+{
+	// TODO: Add your command handler code here
+	mybmp.Save("Result.bmp");
+}
+
+
+void CImageProcessingView::OnClose()
+{
+	// TODO: Add your command handler code here
+	mybmp.Empty();
+	Invalidate(TRUE);
+}
+
+
+void CImageProcessingView::OnOpenSecond()
+{
+	// TODO: Add your command handler code here
+	CFileDialog FileDlg(TRUE, _T("*.bmp"), "", OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY, "image files (*.bmp; *.jpg) |*.bmp;*.jpg|AVI files (*.avi) |*.avi|All Files (*.*)|*.*||", NULL);
+	char title[] = { "Open Image" };
+	FileDlg.m_ofn.lpstrTitle = title;
+
+	CFile file;
+	if (FileDlg.DoModal() == IDOK)
+	{
+		if (!file.Open(FileDlg.GetPathName(), CFile::modeRead))
+		{
+			AfxMessageBox("cannot open the file");
+			return;
+		}
+		if (!mybmp2.Read(&file))
+		{
+			AfxMessageBox("cannot read the file");
+			return;
+		}
+	}
+
+	if (mybmp2.m_lpBMIH->biCompression != BI_RGB)
+	{
+		AfxMessageBox("Can not read compressed file.");
+		return;
+	}
+	sizeDibDisplay2 = mybmp2.GetDimensions();
+
 	Invalidate(TRUE);
 }

@@ -10,6 +10,8 @@ class CImageProcessingView : public CView
 {
 public:
 	CDib mybmp;
+	CDib mybmp2;
+	CSize sizeDibDisplay2;
 	CSize sizeDibDisplay;
 
 protected: // 仅从序列化创建
@@ -51,6 +53,10 @@ protected:
 public:
 	afx_msg void OnOpen();
 	afx_msg void OnRedBlue();
+	afx_msg void OnCloseSecond();
+	afx_msg void OnSave();
+	afx_msg void OnClose();
+	afx_msg void OnOpenSecond();
 };
 
 #ifndef _DEBUG  // ImageProcessingView.cpp 中的调试版本
