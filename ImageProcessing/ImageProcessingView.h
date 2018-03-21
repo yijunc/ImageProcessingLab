@@ -21,7 +21,7 @@ public:
 	CFile ** file;
 
 	//读入图片大小
-	int imageNumber;
+	int imageCount;
 
 protected: // 仅从序列化创建
 	CImageProcessingView();

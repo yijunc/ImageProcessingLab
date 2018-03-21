@@ -54,6 +54,9 @@
     <ClInclude Include="CDib.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="BzDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ImageProcessing.cpp">
@@ -87,6 +90,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CDib.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BzDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

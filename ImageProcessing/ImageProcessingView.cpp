@@ -10,6 +10,7 @@
 
 #include "ImageProcessingDoc.h"
 #include "ImageProcessingView.h"
+#include "BzDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -77,7 +78,7 @@ void CImageProcessingView::OnDraw(CDC* pDC)
 	//可打开多张图片
 	if (newbmp.IsEmpty())
 	{
-		for (int i = 0; i < imageNumber; i++)
+		for (int i = 0; i < imageCount; i++)
 		{
 			if (startX + sizeDibDisplay[i].cx > sysX)
 			{
@@ -170,38 +171,38 @@ CImageProcessingDoc* CImageProcessingView::GetDocument() const // 非调试版本是内
 void CImageProcessingView::OnOpen()
 {
 	//重置当前读入的图片
-	imageNumber = 0;
+	imageCount = 0;
 
 	//为打开文件对话框设置可选中多个图片
 	CFileDialog FileDlg(TRUE, _T("*.bmp"), "",
 	                    OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY | OFN_ALLOWMULTISELECT,
 	                    "image files (*.bmp; *.jpg) |*.bmp;*.jpg|AVI files (*.avi) |*.avi|All Files (*.*)|*.*||", NULL);
-	char title[] = {"Open Image"};
+	char title[] = {"打开图像"};
 	FileDlg.m_ofn.lpstrTitle = title;
 	if (FileDlg.DoModal() == IDOK)
 	{
 		POSITION filePos = FileDlg.GetStartPosition();
 		while (filePos != NULL)
 		{
-			if (imageNumber == MAX_NUM)
+			if (imageCount == MAX_NUM)
 			{
 				//最多只允许打开十个图像
 				AfxMessageBox("图片个数超过上限！");
 				return;
 			}
-			file[imageNumber] = new CFile();
+			file[imageCount] = new CFile();
 			CString filename = FileDlg.GetNextPathName(filePos);
-			if (!(*(file[imageNumber])).Open(filename, CFile::modeRead))
+			if (!(*(file[imageCount])).Open(filename, CFile::modeRead))
 			{
 				AfxMessageBox("cannot open the file");
 				return;
 			}
-			if (!mybmp[imageNumber].Read(file[imageNumber]))
+			if (!mybmp[imageCount].Read(file[imageCount]))
 			{
 				AfxMessageBox("cannot read the file");
 				return;
 			}
-			imageNumber++;
+			imageCount++;
 		}
 	}
 	else
@@ -209,7 +210,7 @@ void CImageProcessingView::OnOpen()
 		return;
 	}
 
-	for (int i = 0; i < imageNumber; i++)
+	for (int i = 0; i < imageCount; i++)
 	{
 		if (mybmp[i].m_lpBMIH->biCompression != BI_RGB)
 		{
@@ -236,7 +237,7 @@ void CImageProcessingView::OnSave()
 	}
 	CFileDialog FileDlg(FALSE, _T("*.bmp"), "处理后图片", OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
 	                    "image files (*.bmp; *.jpg) |*.bmp;*.jpg|AVI files (*.avi) |*.avi|All Files (*.*)|*.*||", NULL);
-	char title[] = {"Save Image"};
+	char title[] = {"保存图像"};
 	FileDlg.m_ofn.lpstrTitle = title;
 	CFile file;
 	if (FileDlg.DoModal() == IDOK)
@@ -258,7 +259,7 @@ void CImageProcessingView::OnSave()
 
 void CImageProcessingView::OnChangeColor()
 {
-	imageNumber = 1;
+	imageCount = 1;
 	if (mybmp[0].IsEmpty())
 	{
 		AfxMessageBox("尚未打开图片！");
@@ -285,12 +286,69 @@ void CImageProcessingView::OnChangeColor()
 
 void CImageProcessingView::OnGray()
 {
+	imageCount = 1;
+	if (mybmp[0].IsEmpty())
+	{
+		AfxMessageBox("尚未打开图片！");
+		return;
+	}
+	newbmp.CopyDib(&mybmp[0]);
+	for (int i = 0; i < newbmp.GetDimensions().cx; i++)
+	{
+		for (int j = 0; j < newbmp.GetDimensions().cy; j++)
+		{
+			RGBQUAD color = mybmp[0].GetPixel(i, j);
+			BYTE tmp = color.rgbRed * 0.30 + color.rgbGreen * 0.59 + color.rgbBlue * 0.11;
+			color.rgbGreen = tmp;
+			color.rgbBlue = tmp;
+			color.rgbRed = tmp;
+			newbmp.WritePixel(i, j, color);
+		}
+	}
 	Invalidate(TRUE);
 }
 
 
 void CImageProcessingView::OnBinaryzation()
 {
+	int threshold;
+	imageCount = 1;
+	if (mybmp[0].IsEmpty())
+	{
+		AfxMessageBox("尚未打开图片！");
+		return;
+	}
+	CBzDlg threditdlg;
+	if (threditdlg.DoModal() == IDOK)
+	{
+		threshold = threditdlg.threshold;
+	}
+	else
+	{
+		return;
+	}
+	newbmp.CopyDib(&mybmp[0]);
+	for (long i = 0; i < newbmp.GetDimensions().cx; i++)
+	{
+		for (long j = 0; j < newbmp.GetDimensions().cy; j++)
+		{
+			RGBQUAD nowcolor = mybmp[0].GetPixel(i, j);
+			BYTE tem = nowcolor.rgbRed * 0.30 + nowcolor.rgbGreen * 0.59 + nowcolor.rgbBlue * 0.11;
+			if (tem >= threshold)
+			{
+				nowcolor.rgbGreen = 255;
+				nowcolor.rgbBlue = 255;
+				nowcolor.rgbRed = 255;
+			}
+			else
+			{
+				nowcolor.rgbGreen = 0;
+				nowcolor.rgbBlue = 0;
+				nowcolor.rgbRed = 0;
+			}
+			newbmp.WritePixel(i, j, nowcolor);
+		}
+	}
 	Invalidate(TRUE);
 }
 
