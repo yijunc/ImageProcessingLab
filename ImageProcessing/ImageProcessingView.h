@@ -26,19 +26,19 @@ public:
 
 	// 重写
 public:
-	virtual void OnDraw(CDC* pDC); // 重写以绘制该视图
-	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
+	void OnDraw(CDC* pDC) override; // 重写以绘制该视图
+	BOOL PreCreateWindow(CREATESTRUCT& cs) override;
 protected:
-	virtual BOOL OnPreparePrinting(CPrintInfo* pInfo);
-	virtual void OnBeginPrinting(CDC* pDC, CPrintInfo* pInfo);
-	virtual void OnEndPrinting(CDC* pDC, CPrintInfo* pInfo);
+	BOOL OnPreparePrinting(CPrintInfo* pInfo) override;
+	void OnBeginPrinting(CDC* pDC, CPrintInfo* pInfo) override;
+	void OnEndPrinting(CDC* pDC, CPrintInfo* pInfo) override;
 
 	// 实现
 public:
 	virtual ~CImageProcessingView();
 #ifdef _DEBUG
-	virtual void AssertValid() const;
-	virtual void Dump(CDumpContext& dc) const;
+	void AssertValid() const override;
+	void Dump(CDumpContext& dc) const override;
 #endif
 
 protected:

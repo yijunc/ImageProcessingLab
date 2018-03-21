@@ -137,7 +137,7 @@ CImageProcessingDoc* CImageProcessingView::GetDocument() const // 非调试版本是内
 void CImageProcessingView::OnOpen()
 {
 	CFileDialog FileDlg(TRUE, _T("*.bmp"), "", OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY,
-	                    "image files (*.bmp; *.jpg) |*.bmp;*.jpg|AVI files (*.avi) |*.avi|All Files (*.*)|*.*||", NULL);
+	                    "image files (*.bmp; *.jpg) |*.bmp;*.jpg|AVI files (*.avi) |*.avi|All Files (*.*)|*.*||", nullptr);
 	char title[] = {"Open Image"};
 	FileDlg.m_ofn.lpstrTitle = title;
 
@@ -191,7 +191,7 @@ void CImageProcessingView::OnClose()
 void CImageProcessingView::OnOpenSecond()
 {
 	CFileDialog FileDlg(TRUE, _T("*.bmp"), "", OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY,
-	                    "image files (*.bmp; *.jpg) |*.bmp;*.jpg|AVI files (*.avi) |*.avi|All Files (*.*)|*.*||", NULL);
+	                    "image files (*.bmp; *.jpg) |*.bmp;*.jpg|AVI files (*.avi) |*.avi|All Files (*.*)|*.*||", nullptr);
 	char title[] = {"Open Image"};
 	FileDlg.m_ofn.lpstrTitle = title;
 
