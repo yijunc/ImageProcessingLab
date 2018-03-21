@@ -206,19 +206,18 @@ BEGIN
     BEGIN
         MENUITEM "打开图像",                        ID_OPEN
         MENUITEM "保存图像",                        ID_SAVE
-        MENUITEM "关闭图像",                        ID_CLOSE
         MENUITEM SEPARATOR
-        MENUITEM "打开第二幅图像",                     ID_OPEN_SECOND
-        MENUITEM "保存第二幅图像",                     ID_SAVE_SECOND
-        MENUITEM "关闭第二幅图像",                     ID_CLOSE_SECOND
     END
     POPUP "图像操作"
     BEGIN
         MENUITEM "改变像素颜色",                      ID_CHANGE_COLOR
+        MENUITEM SEPARATOR
         MENUITEM "灰度化",                         ID_GRAY
         MENUITEM "二值化",                         ID_BINARYZATION
+        MENUITEM SEPARATOR
         MENUITEM "加运算",                         ID_ADD
         MENUITEM "减运算",                         ID_MINUS
+        MENUITEM SEPARATOR
         MENUITEM "平移",                          ID_SHIFT
         MENUITEM "旋转",                          ID_32794
         POPUP "镜像"

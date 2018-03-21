@@ -28,11 +28,7 @@ BEGIN_MESSAGE_MAP(CImageProcessingView, CView)
 		ON_WM_CONTEXTMENU()
 		ON_WM_RBUTTONUP()
 		ON_COMMAND(ID_OPEN, &CImageProcessingView::OnOpen)
-		ON_COMMAND(ID_CLOSE_SECOND, &CImageProcessingView::OnCloseSecond)
 		ON_COMMAND(ID_SAVE, &CImageProcessingView::OnSave)
-		ON_COMMAND(ID_CLOSE, &CImageProcessingView::OnClose)
-		ON_COMMAND(ID_OPEN_SECOND, &CImageProcessingView::OnOpenSecond)
-		ON_COMMAND(ID_SAVE_SECOND, &CImageProcessingView::OnSaveSecond)
 		ON_COMMAND(ID_CHANGE_COLOR, &CImageProcessingView::OnChangeColor)
 		ON_COMMAND(ID_GRAY, &CImageProcessingView::OnGray)
 		ON_COMMAND(ID_BINARYZATION, &CImageProcessingView::OnBinaryzation)
@@ -44,7 +40,8 @@ END_MESSAGE_MAP()
 
 CImageProcessingView::CImageProcessingView()
 {
-	// TODO: 在此处添加构造代码
+	file = (CFile **)malloc(sizeof(CFile *) * MAX_NUM);
+	newbmp.Empty();
 }
 
 CImageProcessingView::~CImageProcessingView()
@@ -63,13 +60,46 @@ BOOL CImageProcessingView::PreCreateWindow(CREATESTRUCT& cs)
 
 void CImageProcessingView::OnDraw(CDC* pDC)
 {
+	//取得画布
 	CImageProcessingDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
 	if (!pDoc)
 		return;
-	if (!mybmp.IsEmpty()) mybmp.Draw(pDC, CPoint(0, 0), sizeDibDisplay);
-	if (!mybmp2.IsEmpty()) mybmp2.Draw(pDC, CPoint(sizeDibDisplay.cx, 0), sizeDibDisplay2);
-	if (!resultBmp.IsEmpty()) resultBmp.Draw(pDC, CPoint(0, sizeDibDisplay.cy + 10), sizeDibResult);
+
+	//取得界面大小
+	CRect rectDlg;
+	GetClientRect(rectDlg);
+	int sysX = rectDlg.Width();
+
+	int startX = 20;
+	int startY = 20, line = 0;
+
+	//可打开多张图片
+	if (newbmp.IsEmpty())
+	{
+		for (int i = 0; i < imageNumber; i++)
+		{
+			if (startX + sizeDibDisplay[i].cx > sysX)
+			{
+				startX = 20;
+				startY += line + 20;
+				line = 0;
+			}
+			mybmp[i].Draw(pDC, CPoint(startX, startY), sizeDibDisplay[i]);
+			startX += sizeDibDisplay[i].cx + 20;
+			if (sizeDibDisplay[i].cy > line)
+			{
+				line = sizeDibDisplay[i].cy;
+			}
+		}
+	}
+
+	//针对第一张图片进行数字图像处理
+	if (!newbmp.IsEmpty())
+	{
+		mybmp[0].Draw(pDC, CPoint(startX, 20), sizeDibDisplay[0]);
+		newbmp.Draw(pDC, CPoint(50 + sizeDibDisplay[0].cx, 20), newbmp.GetDimensions());
+	}
 }
 
 
@@ -139,120 +169,113 @@ CImageProcessingDoc* CImageProcessingView::GetDocument() const // 非调试版本是内
 
 void CImageProcessingView::OnOpen()
 {
-	CFileDialog FileDlg(TRUE, _T("*.bmp"), "", OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY,
-	                    "image files (*.bmp; *.jpg) |*.bmp;*.jpg|AVI files (*.avi) |*.avi|All Files (*.*)|*.*||", nullptr);
+	//重置当前读入的图片
+	imageNumber = 0;
+
+	//为打开文件对话框设置可选中多个图片
+	CFileDialog FileDlg(TRUE, _T("*.bmp"), "",
+	                    OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY | OFN_ALLOWMULTISELECT,
+	                    "image files (*.bmp; *.jpg) |*.bmp;*.jpg|AVI files (*.avi) |*.avi|All Files (*.*)|*.*||", NULL);
 	char title[] = {"Open Image"};
 	FileDlg.m_ofn.lpstrTitle = title;
-
-	CFile file;
 	if (FileDlg.DoModal() == IDOK)
 	{
-		if (!file.Open(FileDlg.GetPathName(), CFile::modeRead))
+		POSITION filePos = FileDlg.GetStartPosition();
+		while (filePos != NULL)
 		{
-			AfxMessageBox("cannot open the file");
-			return;
-		}
-		if (!mybmp.Read(&file))
-		{
-			AfxMessageBox("cannot read the file");
-			return;
+			if (imageNumber == MAX_NUM)
+			{
+				//最多只允许打开十个图像
+				AfxMessageBox("图片个数超过上限！");
+				return;
+			}
+			file[imageNumber] = new CFile();
+			CString filename = FileDlg.GetNextPathName(filePos);
+			if (!(*(file[imageNumber])).Open(filename, CFile::modeRead))
+			{
+				AfxMessageBox("cannot open the file");
+				return;
+			}
+			if (!mybmp[imageNumber].Read(file[imageNumber]))
+			{
+				AfxMessageBox("cannot read the file");
+				return;
+			}
+			imageNumber++;
 		}
 	}
-
-	if (mybmp.m_lpBMIH->biCompression != BI_RGB)
+	else
 	{
-		AfxMessageBox("Can not read compressed file.");
 		return;
 	}
-	sizeDibDisplay = mybmp.GetDimensions();
 
-	Invalidate(TRUE);
-}
+	for (int i = 0; i < imageNumber; i++)
+	{
+		if (mybmp[i].m_lpBMIH->biCompression != BI_RGB)
+		{
+			AfxMessageBox("Can not read compressed file.");
+			return;
+		}
+		sizeDibDisplay[i] = mybmp[i].GetDimensions();
+		file[i]->Close();
+	}
 
-
-void CImageProcessingView::OnCloseSecond()
-{
-	// TODO: Add your command handler code here
-	mybmp2.Empty();
+	//重置处理后图像，清空
+	newbmp.Empty();
 	Invalidate(TRUE);
 }
 
 
 void CImageProcessingView::OnSave()
 {
-	mybmp.Save("mybmp.bmp");
-}
-
-
-void CImageProcessingView::OnClose()
-{
-	mybmp.Empty();
-	Invalidate(TRUE);
-}
-
-
-void CImageProcessingView::OnOpenSecond()
-{
-	CFileDialog FileDlg(TRUE, _T("*.bmp"), "", OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY,
-	                    "image files (*.bmp; *.jpg) |*.bmp;*.jpg|AVI files (*.avi) |*.avi|All Files (*.*)|*.*||", nullptr);
-	char title[] = {"Open Image"};
+	//储存处理后的图像
+	if (newbmp.IsEmpty())
+	{
+		AfxMessageBox("尚未处理图片！");
+		return;
+	}
+	CFileDialog FileDlg(FALSE, _T("*.bmp"), "处理后图片", OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
+	                    "image files (*.bmp; *.jpg) |*.bmp;*.jpg|AVI files (*.avi) |*.avi|All Files (*.*)|*.*||", NULL);
+	char title[] = {"Save Image"};
 	FileDlg.m_ofn.lpstrTitle = title;
-
 	CFile file;
 	if (FileDlg.DoModal() == IDOK)
 	{
-		if (!file.Open(FileDlg.GetPathName(), CFile::modeRead))
+		if (!file.Open(FileDlg.GetPathName(), CFile::modeCreate | CFile::modeWrite))
 		{
-			AfxMessageBox("cannot open the file");
+			AfxMessageBox("cannot save the file");
 			return;
 		}
-		if (!mybmp2.Read(&file))
+		if (!newbmp.Write(&file))
 		{
 			AfxMessageBox("cannot read the file");
 			return;
 		}
 	}
-
-	if (mybmp2.m_lpBMIH->biCompression != BI_RGB)
-	{
-		AfxMessageBox("Can not read compressed file.");
-		return;
-	}
-	sizeDibDisplay2 = mybmp2.GetDimensions();
-
 	Invalidate(TRUE);
-}
-
-
-void CImageProcessingView::OnSaveSecond()
-{
-	mybmp2.Save("mybmp2.bmp");
 }
 
 
 void CImageProcessingView::OnChangeColor()
 {
-	CSize ImageSize = mybmp.GetDimensions();
-
-	for (int y = 0; y < ImageSize.cy; y++)
+	imageNumber = 1;
+	if (mybmp[0].IsEmpty())
 	{
-		for (int x = 0; x < ImageSize.cx; x++)
+		AfxMessageBox("尚未打开图片！");
+		return;
+	}
+	newbmp.CopyDib(&mybmp[0]);
+	for (int y = 0; y < newbmp.GetDimensions().cy; y++)
+	{
+		for (int x = 0; x < newbmp.GetDimensions().cx; x++)
 		{
-			RGBQUAD RedColor = mybmp.GetPixel(x, y);
-			if (y < 70 && y > 50)
+			if (y > 30 && y < 50)
 			{
-				RedColor.rgbRed = 255;
-				RedColor.rgbGreen = 0;
-				RedColor.rgbBlue = 0;
-				mybmp.WritePixel(x, y, RedColor);
-			}
-
-			if (x < 60 && x > 30)
-			{
-				RedColor.rgbRed = 0;
-				RedColor.rgbGreen = 0;
-				RedColor.rgbBlue = 255;
-				mybmp.WritePixel(x, y, RedColor);
+				RGBQUAD color;
+				color.rgbBlue = 0;
+				color.rgbGreen = 0;
+				color.rgbRed = 0;
+				newbmp.WritePixel(x, y, color);
 			}
 		}
 	}
@@ -262,178 +285,23 @@ void CImageProcessingView::OnChangeColor()
 
 void CImageProcessingView::OnGray()
 {
-	// 对图象1的象素值进行变换
-	// 每行
-	for (int y = 0; y < sizeDibDisplay.cy; y++)
-	{
-		// 每列
-		for (int x = 0; x < sizeDibDisplay.cx; x++)
-		{
-			RGBQUAD color;
-			color = mybmp.GetPixel(x, y);
-			//RGB图像转灰度图像 Gray = R*0.299 + G*0.587 + B*0.114
-			int gray = color.rgbRed * 0.299 + color.rgbGreen * 0.587 + color.rgbBlue * 0.114;
-			color.rgbBlue = (unsigned char)gray;
-			color.rgbGreen = (unsigned char)gray;
-			color.rgbRed = (unsigned char)gray;
-			mybmp.WritePixel(x, y, color);
-		}
-	}
-
-	// 对图象2的象素值进行变换
-	// 每行
-	for (int y = 0; y < sizeDibDisplay2.cy; y++)
-	{
-		// 每列
-		for (int x = 0; x < sizeDibDisplay2.cx; x++)
-		{
-			RGBQUAD color;
-			color = mybmp2.GetPixel(x, y);
-			//RGB图像转灰度图像 Gray = R*0.299 + G*0.587 + B*0.114
-			int gray = color.rgbRed * 0.299 + color.rgbGreen * 0.587 + color.rgbBlue * 0.114;
-			color.rgbBlue = (unsigned char)gray;
-			color.rgbGreen = (unsigned char)gray;
-			color.rgbRed = (unsigned char)gray;
-			mybmp2.WritePixel(x, y, color);
-		}
-	}
 	Invalidate(TRUE);
 }
 
 
 void CImageProcessingView::OnBinaryzation()
 {
-	const int thresh = 120;
-
-	// 每行
-	for (int y = 0; y < sizeDibDisplay.cy; y++)
-	{
-		// 每列
-		for (int x = 0; x < sizeDibDisplay.cx; x++)
-		{
-			RGBQUAD color;
-
-			color = mybmp.GetPixel(x, y);
-
-			if (color.rgbBlue < thresh)
-			{
-				color.rgbBlue = 0;
-				color.rgbGreen = 0;
-				color.rgbRed = 0;
-			}
-			else
-			{
-				color.rgbBlue = 255;
-				color.rgbGreen = 255;
-				color.rgbRed = 255;
-			}
-			mybmp.WritePixel(x, y, color);
-		}
-	}
-
-	// 每行
-	for (int y = 0; y < sizeDibDisplay2.cy; y++)
-	{
-		// 每列
-		for (int x = 0; x < sizeDibDisplay2.cx; x++)
-		{
-			RGBQUAD color;
-
-			color = mybmp2.GetPixel(x, y);
-
-			if (color.rgbBlue < thresh)
-			{
-				color.rgbBlue = 0;
-				color.rgbGreen = 0;
-				color.rgbRed = 0;
-			}
-			else
-			{
-				color.rgbBlue = 255;
-				color.rgbGreen = 255;
-				color.rgbRed = 255;
-			}
-			mybmp2.WritePixel(x, y, color);
-		}
-	}
 	Invalidate(TRUE);
 }
 
 
 void CImageProcessingView::OnMinus()
 {
-	resultBmp.CreateCDib(sizeDibDisplay, mybmp.m_lpBMIH->biBitCount);
-
-	// 每行
-	for (int y = 0; y < sizeDibDisplay.cy; y++)
-	{
-		// 每列
-		for (int x = 0; x < sizeDibDisplay.cx; x++)
-		{
-			RGBQUAD color1;
-			RGBQUAD color2;
-
-			color1 = mybmp.GetPixel(x, y);
-			color2 = mybmp2.GetPixel(x, y);
-
-
-			RGBQUAD color;
-
-			int number = (int)color1.rgbBlue - (int)color2.rgbBlue;
-			color.rgbBlue = number > 0 ? number : 0;
-			number = (int)color1.rgbGreen - (int)color2.rgbGreen;
-			color.rgbGreen = number > 0 ? number : 0;
-			number = (int)color1.rgbRed - (int)color2.rgbRed;
-			color.rgbRed = number > 0 ? number : 0;
-
-			resultBmp.WritePixel(x, y, color);
-		}
-	}
-	resultBmp.Save("resultBmp.bmp");
-	sizeDibResult = resultBmp.GetDimensions();
 	Invalidate(TRUE);
 }
 
 
 void CImageProcessingView::OnShift()
 {
-	resultBmp.CreateCDib(sizeDibDisplay, mybmp.m_lpBMIH->biBitCount);
-
-
-	int xoffset = 2;
-	int yoffset = 10;
-
-	RGBQUAD color;
-	RGBQUAD backGroundColor;
-	backGroundColor.rgbRed = 242;
-	backGroundColor.rgbGreen = 239;
-	backGroundColor.rgbBlue = 230;
-
-	/*
-	for(int y = 0; y < sizeDibResult.cy; y++)
-	{
-		for(int  x= 0; x < sizeDibResult.cx; x++)
-		{
-			resultBmp.WritePixel(x, y, backGroundColor);
-		}
-	}
-	*/
-	// 每行
-	
-	for (int y = 0; y < sizeDibDisplay.cy; y++)
-	{
-		// 每列
-		for (int x = 0; x < sizeDibDisplay.cx; x++)
-		{
-			color = mybmp.GetPixel(x, y);
-			color.rgbReserved = 0;
-			resultBmp.WritePixel(x, y, color);
-			
-		}
-	}
-	mybmp.CopyDib(&resultBmp);
-	resultBmp.Empty();
 	Invalidate(TRUE);
-
-
 }

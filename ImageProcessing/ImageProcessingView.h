@@ -4,16 +4,24 @@
 #pragma once
 
 #include "CDib.h"
-
+const int MAX_NUM = 5;
 class CImageProcessingView : public CView
 {
 public:
-	CDib mybmp;
-	CDib mybmp2;
-	CDib resultBmp;
-	CSize sizeDibResult;
-	CSize sizeDibDisplay2;
-	CSize sizeDibDisplay;
+	//多张图片
+	CDib mybmp[MAX_NUM];
+
+	//多张图片大小
+	CSize sizeDibDisplay[MAX_NUM];
+
+	//处理后结果
+	CDib newbmp;
+
+	//读入文件指针
+	CFile ** file;
+
+	//读入图片大小
+	int imageNumber;
 
 protected: // 仅从序列化创建
 	CImageProcessingView();
@@ -53,11 +61,7 @@ protected:
 DECLARE_MESSAGE_MAP()
 public:
 	afx_msg void OnOpen();
-	afx_msg void OnCloseSecond();
 	afx_msg void OnSave();
-	afx_msg void OnClose();
-	afx_msg void OnOpenSecond();
-	afx_msg void OnSaveSecond();
 	afx_msg void OnChangeColor();
 	afx_msg void OnGray();
 	afx_msg void OnBinaryzation();
