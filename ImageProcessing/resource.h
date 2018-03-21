@@ -98,13 +98,20 @@
 #define ID_SAVE                         32779
 #define ID_CLOSE                        32780
 #define ID_32781                        32781
+#define ID_32782                        32782
+#define ID_SAVE_SECOND                  32783
+#define ID_CHANGE_COLOR                 32784
+#define ID_32785                        32785
+#define ID_32786                        32786
+#define ID_GRAY                         32787
+#define ID_BINARYZATION                 32788
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        314
-#define _APS_NEXT_COMMAND_VALUE         32782
+#define _APS_NEXT_COMMAND_VALUE         32789
 #define _APS_NEXT_CONTROL_VALUE         1000
 #define _APS_NEXT_SYMED_VALUE           310
 #endif

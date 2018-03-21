@@ -195,7 +195,6 @@ BEGIN
 END
 
 
-
 /////////////////////////////////////////////////////////////////////////////
 //
 // Menu
@@ -210,11 +209,14 @@ BEGIN
         MENUITEM "关闭图像",                        ID_CLOSE
         MENUITEM SEPARATOR
         MENUITEM "打开第二幅图像",                     ID_OPEN_SECOND
+        MENUITEM "保存第二幅图像",                     ID_SAVE_SECOND
         MENUITEM "关闭第二幅图像",                     ID_CLOSE_SECOND
     END
     POPUP "图像操作"
     BEGIN
-        MENUITEM "Red_Blue",                    32772
+        MENUITEM "改变像素颜色",                      ID_CHANGE_COLOR
+        MENUITEM "灰度化",                         ID_GRAY
+        MENUITEM "二值化",                         ID_BINARYZATION
     END
 END
 
@@ -280,8 +282,6 @@ BEGIN
     MENUITEM "Office 2007 (水绿色样式)(&A)",     ID_VIEW_APPLOOK_OFF_2007_AQUA
     MENUITEM "Windows 7(&D)",               ID_VIEW_APPLOOK_WINDOWS_7
 END
-
-
 
 
 /////////////////////////////////////////////////////////////////////////////

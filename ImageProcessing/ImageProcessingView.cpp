@@ -1,4 +1,3 @@
-
 // ImageProcessingView.cpp : CImageProcessingView 类的实现
 //
 
@@ -22,18 +21,21 @@
 IMPLEMENT_DYNCREATE(CImageProcessingView, CView)
 
 BEGIN_MESSAGE_MAP(CImageProcessingView, CView)
-	// 标准打印命令
-	ON_COMMAND(ID_FILE_PRINT, &CView::OnFilePrint)
-	ON_COMMAND(ID_FILE_PRINT_DIRECT, &CView::OnFilePrint)
-	ON_COMMAND(ID_FILE_PRINT_PREVIEW, &CImageProcessingView::OnFilePrintPreview)
-	ON_WM_CONTEXTMENU()
-	ON_WM_RBUTTONUP()
-	ON_COMMAND(ID_OPEN, &CImageProcessingView::OnOpen)
-	ON_COMMAND(ID_RED_BLUE, &CImageProcessingView::OnRedBlue)
-	ON_COMMAND(ID_CLOSE_SECOND, &CImageProcessingView::OnCloseSecond)
-	ON_COMMAND(ID_SAVE, &CImageProcessingView::OnSave)
-	ON_COMMAND(ID_CLOSE, &CImageProcessingView::OnClose)
-	ON_COMMAND(ID_OPEN_SECOND, &CImageProcessingView::OnOpenSecond)
+		// 标准打印命令
+		ON_COMMAND(ID_FILE_PRINT, &CView::OnFilePrint)
+		ON_COMMAND(ID_FILE_PRINT_DIRECT, &CView::OnFilePrint)
+		ON_COMMAND(ID_FILE_PRINT_PREVIEW, &CImageProcessingView::OnFilePrintPreview)
+		ON_WM_CONTEXTMENU()
+		ON_WM_RBUTTONUP()
+		ON_COMMAND(ID_OPEN, &CImageProcessingView::OnOpen)
+		ON_COMMAND(ID_CLOSE_SECOND, &CImageProcessingView::OnCloseSecond)
+		ON_COMMAND(ID_SAVE, &CImageProcessingView::OnSave)
+		ON_COMMAND(ID_CLOSE, &CImageProcessingView::OnClose)
+		ON_COMMAND(ID_OPEN_SECOND, &CImageProcessingView::OnOpenSecond)
+		ON_COMMAND(ID_SAVE_SECOND, &CImageProcessingView::OnSaveSecond)
+		ON_COMMAND(ID_CHANGE_COLOR, &CImageProcessingView::OnChangeColor)
+		ON_COMMAND(ID_GRAY, &CImageProcessingView::OnGray)
+		ON_COMMAND(ID_BINARYZATION, &CImageProcessingView::OnBinaryzation)
 END_MESSAGE_MAP()
 
 // CImageProcessingView 构造/析构
@@ -41,7 +43,6 @@ END_MESSAGE_MAP()
 CImageProcessingView::CImageProcessingView()
 {
 	// TODO: 在此处添加构造代码
-
 }
 
 CImageProcessingView::~CImageProcessingView()
@@ -135,8 +136,9 @@ CImageProcessingDoc* CImageProcessingView::GetDocument() const // 非调试版本是内
 
 void CImageProcessingView::OnOpen()
 {
-	CFileDialog FileDlg(TRUE, _T("*.bmp"), "", OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY, "image files (*.bmp; *.jpg) |*.bmp;*.jpg|AVI files (*.avi) |*.avi|All Files (*.*)|*.*||", NULL);
-	char title[] = { "Open Image" };
+	CFileDialog FileDlg(TRUE, _T("*.bmp"), "", OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY,
+	                    "image files (*.bmp; *.jpg) |*.bmp;*.jpg|AVI files (*.avi) |*.avi|All Files (*.*)|*.*||", NULL);
+	char title[] = {"Open Image"};
 	FileDlg.m_ofn.lpstrTitle = title;
 
 	CFile file;
@@ -165,38 +167,6 @@ void CImageProcessingView::OnOpen()
 }
 
 
-void CImageProcessingView::OnRedBlue()
-{
-	CSize ImageSize = mybmp.GetDimensions();
-
-	for (int y = 0; y < ImageSize.cy; y++)
-	{
-		for (int x = 0; x < ImageSize.cx; x++)
-		{
-			RGBQUAD RedColor = mybmp.GetPixel(x, y);
-			if (y <70 && y>50)
-			{
-				RedColor.rgbRed = 255;
-				RedColor.rgbGreen = 0;
-				RedColor.rgbBlue = 0;
-				mybmp.WritePixel(x, y, RedColor);
-			}
-
-			if (x <60 && x>30)
-			{
-
-				RedColor.rgbRed = 0;
-				RedColor.rgbGreen = 0;
-				RedColor.rgbBlue = 255;
-				mybmp.WritePixel(x, y, RedColor);
-			}
-
-		}
-	}
-	Invalidate(TRUE);
-}
-
-
 void CImageProcessingView::OnCloseSecond()
 {
 	// TODO: Add your command handler code here
@@ -207,14 +177,12 @@ void CImageProcessingView::OnCloseSecond()
 
 void CImageProcessingView::OnSave()
 {
-	// TODO: Add your command handler code here
 	mybmp.Save("Result.bmp");
 }
 
 
 void CImageProcessingView::OnClose()
 {
-	// TODO: Add your command handler code here
 	mybmp.Empty();
 	Invalidate(TRUE);
 }
@@ -222,9 +190,9 @@ void CImageProcessingView::OnClose()
 
 void CImageProcessingView::OnOpenSecond()
 {
-	// TODO: Add your command handler code here
-	CFileDialog FileDlg(TRUE, _T("*.bmp"), "", OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY, "image files (*.bmp; *.jpg) |*.bmp;*.jpg|AVI files (*.avi) |*.avi|All Files (*.*)|*.*||", NULL);
-	char title[] = { "Open Image" };
+	CFileDialog FileDlg(TRUE, _T("*.bmp"), "", OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY,
+	                    "image files (*.bmp; *.jpg) |*.bmp;*.jpg|AVI files (*.avi) |*.avi|All Files (*.*)|*.*||", NULL);
+	char title[] = {"Open Image"};
 	FileDlg.m_ofn.lpstrTitle = title;
 
 	CFile file;
@@ -249,5 +217,141 @@ void CImageProcessingView::OnOpenSecond()
 	}
 	sizeDibDisplay2 = mybmp2.GetDimensions();
 
+	Invalidate(TRUE);
+}
+
+
+void CImageProcessingView::OnSaveSecond()
+{
+	mybmp2.Save("Result2.bmp");
+}
+
+
+void CImageProcessingView::OnChangeColor()
+{
+	CSize ImageSize = mybmp.GetDimensions();
+
+	for (int y = 0; y < ImageSize.cy; y++)
+	{
+		for (int x = 0; x < ImageSize.cx; x++)
+		{
+			RGBQUAD RedColor = mybmp.GetPixel(x, y);
+			if (y < 70 && y > 50)
+			{
+				RedColor.rgbRed = 255;
+				RedColor.rgbGreen = 0;
+				RedColor.rgbBlue = 0;
+				mybmp.WritePixel(x, y, RedColor);
+			}
+
+			if (x < 60 && x > 30)
+			{
+				RedColor.rgbRed = 0;
+				RedColor.rgbGreen = 0;
+				RedColor.rgbBlue = 255;
+				mybmp.WritePixel(x, y, RedColor);
+			}
+		}
+	}
+	Invalidate(TRUE);
+}
+
+
+void CImageProcessingView::OnGray()
+{
+	// 对图象1的象素值进行变换
+	// 每行
+	for (int y = 0; y < sizeDibDisplay.cy; y++)
+	{
+		// 每列
+		for (int x = 0; x < sizeDibDisplay.cx; x++)
+		{
+			RGBQUAD color;
+			color = mybmp.GetPixel(x, y);
+			//RGB图像转灰度图像 Gray = R*0.299 + G*0.587 + B*0.114
+			int gray = color.rgbRed * 0.299 + color.rgbGreen * 0.587 + color.rgbBlue * 0.114;
+			color.rgbBlue = (unsigned char)gray;
+			color.rgbGreen = (unsigned char)gray;
+			color.rgbRed = (unsigned char)gray;
+			mybmp.WritePixel(x, y, color);
+		}
+	}
+
+	// 对图象2的象素值进行变换
+	// 每行
+	for (int y = 0; y < sizeDibDisplay2.cy; y++)
+	{
+		// 每列
+		for (int x = 0; x < sizeDibDisplay2.cx; x++)
+		{
+			RGBQUAD color;
+			color = mybmp2.GetPixel(x, y);
+			//RGB图像转灰度图像 Gray = R*0.299 + G*0.587 + B*0.114
+			int gray = color.rgbRed * 0.299 + color.rgbGreen * 0.587 + color.rgbBlue * 0.114;
+			color.rgbBlue = (unsigned char)gray;
+			color.rgbGreen = (unsigned char)gray;
+			color.rgbRed = (unsigned char)gray;
+			mybmp2.WritePixel(x, y, color);
+		}
+	}
+	Invalidate(TRUE);
+}
+
+
+void CImageProcessingView::OnBinaryzation()
+{
+	const int thresh = 120;
+
+	// 每行
+	for (int y = 0; y < sizeDibDisplay.cy; y++)
+	{
+		// 每列
+		for (int x = 0; x < sizeDibDisplay.cx; x++)
+		{
+			RGBQUAD color;
+
+			color = mybmp.GetPixel(x, y);
+
+			if (color.rgbBlue < thresh)
+			{
+				color.rgbBlue = 0;
+				color.rgbGreen = 0;
+				color.rgbRed = 0;
+			}
+			else
+			{
+				color.rgbBlue = 255;
+				color.rgbGreen = 255;
+				color.rgbRed = 255;
+			}
+			mybmp.WritePixel(x, y, color);
+		}
+	}
+
+	// 每行
+	for (int y = 0; y < sizeDibDisplay2.cy; y++)
+	{
+		// 每列
+		for (int x = 0; x < sizeDibDisplay2.cx; x++)
+		{
+			RGBQUAD color;
+
+			color = mybmp2.GetPixel(x, y);
+
+			if (color.rgbBlue < thresh)
+			{
+				color.rgbBlue = 0;
+				color.rgbGreen = 0;
+				color.rgbRed = 0;
+			}
+			else
+			{
+				color.rgbBlue = 255;
+				color.rgbGreen = 255;
+				color.rgbRed = 255;
+			}
+			mybmp2.WritePixel(x, y, color);
+		}
+	}
 	Invalidate(TRUE);
 }
