@@ -88,7 +88,9 @@
 #define IDR_TOOLBAR1                    311
 #define IDR_MENU2                       313
 #define IDD_BZ_DLG                      314
+#define IDD_ROTATION_DLG                316
 #define IDC_EDIT1                       1000
+#define IDC_CHECK1                      1001
 #define ID_32771                        32771
 #define ID_RED_BLUE                     32772
 #define ID_32773                        32773
@@ -123,9 +125,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        316
+#define _APS_NEXT_RESOURCE_VALUE        318
 #define _APS_NEXT_COMMAND_VALUE         32800
-#define _APS_NEXT_CONTROL_VALUE         1001
+#define _APS_NEXT_CONTROL_VALUE         1002
 #define _APS_NEXT_SYMED_VALUE           310
 #endif
 #endif

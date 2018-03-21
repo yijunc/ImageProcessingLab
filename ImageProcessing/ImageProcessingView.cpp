@@ -11,6 +11,7 @@
 #include "ImageProcessingDoc.h"
 #include "ImageProcessingView.h"
 #include "BzDlg.h"
+#include "RotationDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -267,9 +268,9 @@ void CImageProcessingView::OnChangeColor()
 		return;
 	}
 	newbmp.CopyDib(&mybmp[0]);
-	for (int y = 0; y < newbmp.GetDimensions().cy; y++)
+	for (long y = 0; y < (long)newbmp.GetDimensions().cy; y++)
 	{
-		for (int x = 0; x < newbmp.GetDimensions().cx; x++)
+		for (long x = 0; x < (long)newbmp.GetDimensions().cx; x++)
 		{
 			if (y > 30 && y < 50)
 			{
@@ -329,9 +330,9 @@ void CImageProcessingView::OnBinaryzation()
 		return;
 	}
 	newbmp.CopyDib(&mybmp[0]);
-	for (long i = 0; i < newbmp.GetDimensions().cx; i++)
+	for (long i = 0; i < (long)newbmp.GetDimensions().cx; i++)
 	{
-		for (long j = 0; j < newbmp.GetDimensions().cy; j++)
+		for (long j = 0; j < (long)newbmp.GetDimensions().cy; j++)
 		{
 			RGBQUAD nowcolor = mybmp[0].GetPixel(i, j);
 			BYTE tem = nowcolor.rgbRed * 0.30 + nowcolor.rgbGreen * 0.59 + nowcolor.rgbBlue * 0.11;
@@ -391,9 +392,9 @@ void CImageProcessingView::OnMinus()
 	newbmp.CopyDib(&mybmp[0]);
 	RGBQUAD color, minusColor;
 	int result;
-	for (int i = 0; i < newbmp.GetDimensions().cx; i++)
+	for (long i = 0; i < (long)newbmp.GetDimensions().cx; i++)
 	{
-		for (int j = 0; j < newbmp.GetDimensions().cy; j++)
+		for (long j = 0; j < (long)newbmp.GetDimensions().cy; j++)
 		{
 			color = newbmp.GetPixel(i, j);
 			minusColor = tembmp.GetPixel(i, j);
@@ -442,21 +443,19 @@ void CImageProcessingView::OnRotate()
 		AfxMessageBox("ÉÐÎ´´ò¿ªÍ¼Æ¬£¡");
 		return;
 	}
-	/*
-	CMyRotationDlg rotationdlg;
+	CRotationDlg rotationdlg;
 	if (rotationdlg.DoModal() == IDOK) {
-		angle = rotationdlg.GetRotationAngle();
+		angle = rotationdlg.angle;
 		angle= angle*pi / 180.0;
 	}
 	else {
 		return;
 	}
-	*/
+	
 	CSize mysize;
 	mysize = mybmp[0].GetDimensions();
 	double x = mysize.cx;
 	double y = mysize.cy;
-	TRACE("%f %f\n", sin(angle), cos(angle));
 	double nx = 0, ny = 0, mx, my;
 	nx -= (x / 2.0), ny -= (y / 2.0);
 	mx = nx*cos(angle) + ny*sin(angle);
@@ -475,10 +474,8 @@ void CImageProcessingView::OnRotate()
 			double jj = double(j) - newsizey / 2.0;
 			prex = -(-ii*cos(angle) + jj*sin(angle));
 			prey = ii*sin(angle) + jj*cos(angle);
-			//prex > 0 ? prex += 0.5 : prex -= 0.5;
-			prex = (long)(prex + x / 2.0 + 0.5);
-			//prey > 0 ? prey += 0.5 : prey -= 0.5;
-			prey = (long)(prey + y / 2.0 + 0.5);
+			prex = (int)(prex + x / 2.0 + 0.5);
+			prey = (int)(prey + y / 2.0 + 0.5);
 			if (prex >= 0 && prex < x&&prey >= 0 && prey < y) {
 				nowcolor = mybmp[0].GetPixel(prex, prey);
 			}
@@ -486,10 +483,7 @@ void CImageProcessingView::OnRotate()
 				nowcolor.rgbBlue = nowcolor.rgbGreen = nowcolor.rgbRed = 255;
 			}
 			newbmp.WritePixel(i, j, nowcolor);
-			//	nowcolor = mybmp.GetPixel(x, y);
 		}
 	}
 	Invalidate(TRUE);
-	angle= 0;
-	return;
 }

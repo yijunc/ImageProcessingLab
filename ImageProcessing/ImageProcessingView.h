@@ -5,7 +5,7 @@
 
 #include "CDib.h"
 const int MAX_NUM = 5;
-const double pi = 3.1415926;
+const double pi = 3.1415926535898;
 class CImageProcessingView : public CView
 {
 public:
