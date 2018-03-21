@@ -50,10 +50,9 @@ public:
 	void Serialize(CArchive& ar);
 	void Empty();
     BOOL IsEmpty();
-	BOOL Save(LPCSTR lpszDibFile);
     CSize GetDibSaveDim();
-    LONG GetPixelOffset(int  x, int y);
-	LONG CDib::GetAviPixelOffset(int  x, int y);
+    int GetPixelOffset(int  x, int y);
+	int CDib::GetAviPixelOffset(int  x, int y);
     RGBQUAD GetPixel(int x, int y);
     void WritePixel(int x, int y,RGBQUAD color);
     void CreateCDib(CSize size, int nBitCount);

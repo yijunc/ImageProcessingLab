@@ -5,6 +5,7 @@
 
 #include "CDib.h"
 const int MAX_NUM = 5;
+const double pi = 3.1415926;
 class CImageProcessingView : public CView
 {
 public:
@@ -67,6 +68,7 @@ public:
 	afx_msg void OnBinaryzation();
 	afx_msg void OnMinus();
 	afx_msg void OnShift();
+	afx_msg void OnRotate();
 };
 
 #ifndef _DEBUG  // ImageProcessingView.cpp 中的调试版本

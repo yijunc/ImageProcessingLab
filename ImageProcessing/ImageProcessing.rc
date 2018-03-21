@@ -219,7 +219,7 @@ BEGIN
         MENUITEM "减运算",                         ID_MINUS
         MENUITEM SEPARATOR
         MENUITEM "平移",                          ID_SHIFT
-        MENUITEM "旋转",                          ID_32794
+        MENUITEM "旋转",                          ID_ROTATE
         POPUP "镜像"
         BEGIN
             MENUITEM "水平",                          ID_32796

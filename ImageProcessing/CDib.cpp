@@ -587,21 +587,21 @@ CSize CDib::GetDibSaveDim()
  *
  ************************************************************************
  */
-LONG CDib::GetPixelOffset(int  x, int y)
+int CDib::GetPixelOffset(int  x, int y)
 {
 	CSize sizeSaveDim;
 	sizeSaveDim = GetDibSaveDim();
 
-	LONG lOffset = (LONG) (sizeSaveDim.cy - y - 1) * sizeSaveDim.cx + x*(m_lpBMIH->biBitCount/8);
+	int lOffset = (int) (sizeSaveDim.cy - y - 1) * sizeSaveDim.cx + x*(m_lpBMIH->biBitCount/8);
 	return lOffset;
 }
 
-LONG CDib::GetAviPixelOffset(int  x, int y)
+int CDib::GetAviPixelOffset(int  x, int y)
 {
 	CSize sizeSaveDim;
 	sizeSaveDim = GetDibSaveDim();
 
-	LONG lOffset = (LONG) (y) * sizeSaveDim.cx + x*(m_lpBMIH->biBitCount/8);
+	int lOffset = (int) (y) * sizeSaveDim.cx + x*(m_lpBMIH->biBitCount/8);
 	return lOffset;
 }
 
@@ -626,7 +626,16 @@ RGBQUAD CDib::GetPixel(int x, int y)
 {
 	// 颜色结构
 	RGBQUAD cColor;
-	
+	CSize cs = GetDimensions();
+	int kx = cs.cx, ky = cs.cy;
+	if (x < 0 || y >= ky || y < 0 || x >= kx) {
+		cColor.rgbBlue = 255;
+		cColor.rgbGreen = 255;
+		cColor.rgbRed = 255;
+		cColor.rgbReserved = 0;
+	//	TRACE("kkkkk\n");
+		return cColor;
+	}
 	// 根据每象素比特数得到此点的象素值
 	switch (m_lpBMIH->biBitCount)
 	{
@@ -726,9 +735,9 @@ void CDib::WritePixel(int x, int y,RGBQUAD color)
 			}
 		default:
 				int nIndex =GetPixelOffset(x, y);// *(BYTE*)(m_lpImage+GetPixelOffset(x, y));					
-				m_lpImage[nIndex] = color.rgbBlue; 
+				m_lpImage[nIndex] = color.rgbRed; 
 				m_lpImage[nIndex + 1] = color.rgbGreen;
-				m_lpImage[nIndex + 2] =color.rgbRed ;
+				m_lpImage[nIndex + 2] = color.rgbBlue;
 				break;
 	}
 }
@@ -824,18 +833,4 @@ void CDib::CopyDib(CDib* pDibSrc)
 	}
 }
 
-BOOL CDib::Save(LPCSTR lpszDibFile)
-{
-	 TRY
-	 {
-	  CFile file(lpszDibFile, CFile::modeCreate|CFile::modeWrite);
-	  if (! Write(&file))
-	   return FALSE;
-	 }
-	 CATCH (CException, e)
-	 {
-	  return FALSE;
-	 }
-	 END_CATCH
-	 return TRUE;
-}
+

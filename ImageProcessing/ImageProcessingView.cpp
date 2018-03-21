@@ -35,6 +35,7 @@ BEGIN_MESSAGE_MAP(CImageProcessingView, CView)
 		ON_COMMAND(ID_BINARYZATION, &CImageProcessingView::OnBinaryzation)
 		ON_COMMAND(ID_MINUS, &CImageProcessingView::OnMinus)
 		ON_COMMAND(ID_SHIFT, &CImageProcessingView::OnShift)
+		ON_COMMAND(ID_ROTATE, &CImageProcessingView::OnRotate)
 END_MESSAGE_MAP()
 
 // CImageProcessingView 构造/析构
@@ -355,6 +356,74 @@ void CImageProcessingView::OnBinaryzation()
 
 void CImageProcessingView::OnMinus()
 {
+	imageCount = 1;
+
+	//打开相减操作的图片
+	CDib tembmp;
+	CFileDialog FileDlg(TRUE, _T("*.bmp"), "打开相减操作的图片", OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY,
+	                    "image files (*.bmp; *.jpg) |*.bmp;*.jpg|AVI files (*.avi) |*.avi|All Files (*.*)|*.*||", NULL);
+	char title[] = {"Open Image"};
+	FileDlg.m_ofn.lpstrTitle = title;
+	CFile file;
+	if (FileDlg.DoModal() == IDOK)
+	{
+		if (!file.Open(FileDlg.GetPathName(), CFile::modeRead))
+		{
+			AfxMessageBox("cannot open the file");
+			return;
+		}
+		if (!tembmp.Read(&file))
+		{
+			AfxMessageBox("cannot read the file");
+			return;
+		}
+	}
+	else
+	{
+		return;
+	}
+	if (tembmp.m_lpBMIH->biCompression != BI_RGB)
+	{
+		AfxMessageBox("Can not read compressed file.");
+		return;
+	}
+	newbmp.Empty();
+	newbmp.CopyDib(&mybmp[0]);
+	RGBQUAD color, minusColor;
+	int result;
+	for (int i = 0; i < newbmp.GetDimensions().cx; i++)
+	{
+		for (int j = 0; j < newbmp.GetDimensions().cy; j++)
+		{
+			color = newbmp.GetPixel(i, j);
+			minusColor = tembmp.GetPixel(i, j);
+			if((int) color.rgbBlue - (int) minusColor.rgbBlue < 0)
+			{
+				color.rgbBlue = 0;
+			}
+			else
+			{
+				color.rgbBlue -= minusColor.rgbBlue;
+			}
+			if ((int)color.rgbGreen - (int)minusColor.rgbGreen < 0)
+			{
+				color.rgbGreen = 0;
+			}
+			else
+			{
+				color.rgbGreen -= minusColor.rgbGreen;
+			}
+			if ((int)color.rgbRed - (int)minusColor.rgbRed < 0)
+			{
+				color.rgbRed = 0;
+			}
+			else
+			{
+				color.rgbRed -= minusColor.rgbRed;
+			}
+			newbmp.WritePixel(i, j, color);
+		}
+	}
 	Invalidate(TRUE);
 }
 
@@ -362,4 +431,65 @@ void CImageProcessingView::OnMinus()
 void CImageProcessingView::OnShift()
 {
 	Invalidate(TRUE);
+}
+
+
+void CImageProcessingView::OnRotate()
+{
+	imageCount = 1;
+	double angle = 30;
+	if (mybmp[0].IsEmpty()) {
+		AfxMessageBox("尚未打开图片！");
+		return;
+	}
+	/*
+	CMyRotationDlg rotationdlg;
+	if (rotationdlg.DoModal() == IDOK) {
+		angle = rotationdlg.GetRotationAngle();
+		angle= angle*pi / 180.0;
+	}
+	else {
+		return;
+	}
+	*/
+	CSize mysize;
+	mysize = mybmp[0].GetDimensions();
+	double x = mysize.cx;
+	double y = mysize.cy;
+	TRACE("%f %f\n", sin(angle), cos(angle));
+	double nx = 0, ny = 0, mx, my;
+	nx -= (x / 2.0), ny -= (y / 2.0);
+	mx = nx*cos(angle) + ny*sin(angle);
+	double newsizex, newsizey;
+	newsizex = 2 * fabs(mx) + 0.5;
+	nx = x / 2.0, ny = -y / 2.0;
+	my = -nx*sin(angle) + ny*cos(angle);
+	newsizey = 2 * fabs(my) + 0.5;
+	newbmp.Empty();
+	newbmp.CreateCDib(CSize(newsizex, newsizey), mybmp[0].m_lpBMIH->biBitCount);
+	for (long i = 0; i < (long)newsizex; i++) {
+		for (long j = 0; j < (long)newsizey; j++) {
+			RGBQUAD nowcolor;
+			double prex, prey;
+			double ii = double(i) - newsizex / 2.0;
+			double jj = double(j) - newsizey / 2.0;
+			prex = -(-ii*cos(angle) + jj*sin(angle));
+			prey = ii*sin(angle) + jj*cos(angle);
+			//prex > 0 ? prex += 0.5 : prex -= 0.5;
+			prex = (long)(prex + x / 2.0 + 0.5);
+			//prey > 0 ? prey += 0.5 : prey -= 0.5;
+			prey = (long)(prey + y / 2.0 + 0.5);
+			if (prex >= 0 && prex < x&&prey >= 0 && prey < y) {
+				nowcolor = mybmp[0].GetPixel(prex, prey);
+			}
+			else {
+				nowcolor.rgbBlue = nowcolor.rgbGreen = nowcolor.rgbRed = 255;
+			}
+			newbmp.WritePixel(i, j, nowcolor);
+			//	nowcolor = mybmp.GetPixel(x, y);
+		}
+	}
+	Invalidate(TRUE);
+	angle= 0;
+	return;
 }
