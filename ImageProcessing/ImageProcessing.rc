@@ -217,6 +217,15 @@ BEGIN
         MENUITEM "改变像素颜色",                      ID_CHANGE_COLOR
         MENUITEM "灰度化",                         ID_GRAY
         MENUITEM "二值化",                         ID_BINARYZATION
+        MENUITEM "加运算",                         ID_ADD
+        MENUITEM "减运算",                         ID_MINUS
+        MENUITEM "平移",                          ID_SHIFT
+        MENUITEM "旋转",                          ID_32794
+        POPUP "镜像"
+        BEGIN
+            MENUITEM "水平",                          ID_32796
+            MENUITEM "垂直",                          ID_32797
+        END
     END
 END
 

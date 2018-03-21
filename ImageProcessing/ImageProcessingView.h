@@ -10,6 +10,8 @@ class CImageProcessingView : public CView
 public:
 	CDib mybmp;
 	CDib mybmp2;
+	CDib resultBmp;
+	CSize sizeDibResult;
 	CSize sizeDibDisplay2;
 	CSize sizeDibDisplay;
 
@@ -59,6 +61,8 @@ public:
 	afx_msg void OnChangeColor();
 	afx_msg void OnGray();
 	afx_msg void OnBinaryzation();
+	afx_msg void OnMinus();
+	afx_msg void OnShift();
 };
 
 #ifndef _DEBUG  // ImageProcessingView.cpp 中的调试版本
