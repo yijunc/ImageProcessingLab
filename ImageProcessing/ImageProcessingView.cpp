@@ -36,6 +36,7 @@ BEGIN_MESSAGE_MAP(CImageProcessingView, CView)
 		ON_COMMAND(ID_CHANGE_COLOR, &CImageProcessingView::OnChangeColor)
 		ON_COMMAND(ID_GRAY, &CImageProcessingView::OnGray)
 		ON_COMMAND(ID_BINARYZATION, &CImageProcessingView::OnBinaryzation)
+		ON_COMMAND(ID_MINUS, &CImageProcessingView::OnMinus)
 END_MESSAGE_MAP()
 
 // CImageProcessingView 构造/析构
@@ -65,8 +66,9 @@ void CImageProcessingView::OnDraw(CDC* pDC)
 	ASSERT_VALID(pDoc);
 	if (!pDoc)
 		return;
-	mybmp.Draw(pDC, CPoint(0, 0), sizeDibDisplay);
-	mybmp2.Draw(pDC, CPoint(sizeDibDisplay.cx, 0), sizeDibDisplay2);
+	if(!mybmp.IsEmpty()) mybmp.Draw(pDC, CPoint(0, 0), sizeDibDisplay);
+	if(!mybmp2.IsEmpty()) mybmp2.Draw(pDC, CPoint(sizeDibDisplay.cx, 0), sizeDibDisplay2);
+	if(!resultBmp.IsEmpty()) resultBmp.Draw(pDC, CPoint(0, sizeDibDisplay.cy + 10), sizeDibResult);
 }
 
 
@@ -177,7 +179,7 @@ void CImageProcessingView::OnCloseSecond()
 
 void CImageProcessingView::OnSave()
 {
-	mybmp.Save("Result.bmp");
+	mybmp.Save("mybmp.bmp");
 }
 
 
@@ -223,7 +225,7 @@ void CImageProcessingView::OnOpenSecond()
 
 void CImageProcessingView::OnSaveSecond()
 {
-	mybmp2.Save("Result2.bmp");
+	mybmp2.Save("mybmp2.bmp");
 }
 
 
@@ -353,5 +355,40 @@ void CImageProcessingView::OnBinaryzation()
 			mybmp2.WritePixel(x, y, color);
 		}
 	}
+	Invalidate(TRUE);
+}
+
+
+void CImageProcessingView::OnMinus()
+{
+	resultBmp.CreateCDib(sizeDibDisplay, mybmp.m_lpBMIH->biBitCount);
+
+	// 每行
+	for (int y = 0; y < sizeDibDisplay.cy; y++)
+	{
+		// 每列
+		for (int x = 0; x < sizeDibDisplay.cx; x++)
+		{
+			RGBQUAD color1;
+			RGBQUAD color2;
+
+			color1 = mybmp.GetPixel(x, y);
+			color2 = mybmp2.GetPixel(x, y);
+
+
+			RGBQUAD color;
+			
+			int number = (int)color1.rgbBlue - (int)color2.rgbBlue;
+			color.rgbBlue = number > 0 ? number : 0;
+			number = (int)color1.rgbGreen - (int)color2.rgbGreen;
+			color.rgbGreen = number > 0 ? number : 0;
+			number = (int)color1.rgbRed - (int)color2.rgbRed;
+			color.rgbRed = number > 0 ? number : 0;
+			
+			resultBmp.WritePixel(x, y, color);
+		}
+	}
+	resultBmp.Save("resultBmp.bmp");
+	sizeDibResult = resultBmp.GetDimensions();
 	Invalidate(TRUE);
 }

@@ -217,6 +217,8 @@ BEGIN
         MENUITEM "改变像素颜色",                      ID_CHANGE_COLOR
         MENUITEM "灰度化",                         ID_GRAY
         MENUITEM "二值化",                         ID_BINARYZATION
+        MENUITEM "加运算",                         ID_32789
+        MENUITEM "减运算",                         ID_MINUS
     END
 END
 
