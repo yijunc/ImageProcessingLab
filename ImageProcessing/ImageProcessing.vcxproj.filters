@@ -60,6 +60,9 @@
     <ClInclude Include="RotationDlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ShiftDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ImageProcessing.cpp">
@@ -99,6 +102,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="RotationDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ShiftDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

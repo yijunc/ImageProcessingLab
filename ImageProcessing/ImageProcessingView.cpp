@@ -12,6 +12,7 @@
 #include "ImageProcessingView.h"
 #include "BzDlg.h"
 #include "RotationDlg.h"
+#include "ShiftDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -275,9 +276,9 @@ void CImageProcessingView::OnChangeColor()
 			if (y > 30 && y < 50)
 			{
 				RGBQUAD color;
-				color.rgbBlue = 0;
-				color.rgbGreen = 0;
-				color.rgbRed = 0;
+				color.rgbBlue = 255;
+				color.rgbGreen = 255;
+				color.rgbRed = 255;
 				newbmp.WritePixel(x, y, color);
 			}
 		}
@@ -398,7 +399,7 @@ void CImageProcessingView::OnMinus()
 		{
 			color = newbmp.GetPixel(i, j);
 			minusColor = tembmp.GetPixel(i, j);
-			if((int) color.rgbBlue - (int) minusColor.rgbBlue < 0)
+			if ((int)color.rgbBlue - (int)minusColor.rgbBlue < 0)
 			{
 				color.rgbBlue = 0;
 			}
@@ -431,6 +432,44 @@ void CImageProcessingView::OnMinus()
 
 void CImageProcessingView::OnShift()
 {
+	imageCount = 1;
+	if (mybmp[0].IsEmpty())
+	{
+		AfxMessageBox("ÉÐÎ´´ò¿ªÍ¼Æ¬£¡");
+		return;
+	}
+	CShiftDlg shiftdlg;
+	int xoffset = 0, yoffset = 0;
+	if (shiftdlg.DoModal() == IDOK)
+	{
+		xoffset = shiftdlg.x;
+		yoffset = shiftdlg.y;
+	}
+	else
+	{
+		return;
+	}
+	newbmp.Empty();
+	newbmp.CreateCDib(mybmp[0].GetDimensions(), mybmp[0].m_lpBMIH->biBitCount);
+	RGBQUAD color;
+	for (long x = 0; x < (long)newbmp.GetDimensions().cx; x++)
+	{
+		for (long y = 0; y < (long)newbmp.GetDimensions().cy; y++)
+		{
+			color = mybmp[0].GetPixel(x, y);
+			int newx = x + xoffset;
+			int newy = y + yoffset;
+
+			if (newx < 0 || newx >= newbmp.GetDimensions().cx || newy < 0 || newy >= newbmp.GetDimensions().cy)
+			{
+				//Do nothing.
+			}
+			else
+			{
+				newbmp.WritePixel(newx, newy, color);
+			}
+		}
+	}
 	Invalidate(TRUE);
 }
 
@@ -438,48 +477,55 @@ void CImageProcessingView::OnShift()
 void CImageProcessingView::OnRotate()
 {
 	imageCount = 1;
-	double angle = 30;
-	if (mybmp[0].IsEmpty()) {
+	double angle;
+	if (mybmp[0].IsEmpty())
+	{
 		AfxMessageBox("ÉÐÎ´´ò¿ªÍ¼Æ¬£¡");
 		return;
 	}
 	CRotationDlg rotationdlg;
-	if (rotationdlg.DoModal() == IDOK) {
+	if (rotationdlg.DoModal() == IDOK)
+	{
 		angle = rotationdlg.angle;
-		angle= angle*pi / 180.0;
+		angle = angle * pi / 180.0;
 	}
-	else {
+	else
+	{
 		return;
 	}
-	
+
 	CSize mysize;
 	mysize = mybmp[0].GetDimensions();
 	double x = mysize.cx;
 	double y = mysize.cy;
 	double nx = 0, ny = 0, mx, my;
 	nx -= (x / 2.0), ny -= (y / 2.0);
-	mx = nx*cos(angle) + ny*sin(angle);
+	mx = nx * cos(angle) + ny * sin(angle);
 	double newsizex, newsizey;
 	newsizex = 2 * fabs(mx) + 0.5;
 	nx = x / 2.0, ny = -y / 2.0;
-	my = -nx*sin(angle) + ny*cos(angle);
+	my = -nx * sin(angle) + ny * cos(angle);
 	newsizey = 2 * fabs(my) + 0.5;
 	newbmp.Empty();
 	newbmp.CreateCDib(CSize(newsizex, newsizey), mybmp[0].m_lpBMIH->biBitCount);
-	for (long i = 0; i < (long)newsizex; i++) {
-		for (long j = 0; j < (long)newsizey; j++) {
+	for (long i = 0; i < (long)newsizex; i++)
+	{
+		for (long j = 0; j < (long)newsizey; j++)
+		{
 			RGBQUAD nowcolor;
 			double prex, prey;
 			double ii = double(i) - newsizex / 2.0;
 			double jj = double(j) - newsizey / 2.0;
-			prex = -(-ii*cos(angle) + jj*sin(angle));
-			prey = ii*sin(angle) + jj*cos(angle);
+			prex = -(-ii * cos(angle) + jj * sin(angle));
+			prey = ii * sin(angle) + jj * cos(angle);
 			prex = (int)(prex + x / 2.0 + 0.5);
 			prey = (int)(prey + y / 2.0 + 0.5);
-			if (prex >= 0 && prex < x&&prey >= 0 && prey < y) {
+			if (prex >= 0 && prex < x && prey >= 0 && prey < y)
+			{
 				nowcolor = mybmp[0].GetPixel(prex, prey);
 			}
-			else {
+			else
+			{
 				nowcolor.rgbBlue = nowcolor.rgbGreen = nowcolor.rgbRed = 255;
 			}
 			newbmp.WritePixel(i, j, nowcolor);
