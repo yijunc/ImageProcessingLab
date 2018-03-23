@@ -39,7 +39,7 @@ BEGIN_MESSAGE_MAP(CImageProcessingView, CView)
 		ON_COMMAND(ID_SHIFT, &CImageProcessingView::OnShift)
 		ON_COMMAND(ID_ROTATE, &CImageProcessingView::OnRotate)
 		ON_COMMAND(ID_MIRROR_H, &CImageProcessingView::OnMirrorH)
-	ON_COMMAND(ID_MIRROR_V, &CImageProcessingView::OnMirrorV)
+		ON_COMMAND(ID_MIRROR_V, &CImageProcessingView::OnMirrorV)
 END_MESSAGE_MAP()
 
 // CImageProcessingView 构造/析构
@@ -495,41 +495,70 @@ void CImageProcessingView::OnRotate()
 	{
 		return;
 	}
-	CSize mysize;
-	mysize = mybmp[0].GetDimensions();
-	double x = mysize.cx;
-	double y = mysize.cy;
-	double nx = 0, ny = 0, mx, my;
-	nx -= (x / 2.0), ny -= (y / 2.0);
-	mx = nx * cos(angle) + ny * sin(angle);
-	double newsizex, newsizey;
-	newsizex = 2 * fabs(mx) + 0.5;
-	nx = x / 2.0, ny = -y / 2.0;
-	my = -nx * sin(angle) + ny * cos(angle);
-	newsizey = 2 * fabs(my) + 0.5;
-	newbmp.Empty();
-	newbmp.CreateCDib(CSize(newsizex, newsizey), mybmp[0].m_lpBMIH->biBitCount);
-	for (long i = 0; i < (long)newsizex; i++)
+	// 源图四个角的坐标（以图像中心为坐标系原点）
+	float fSrcX1, fSrcY1, fSrcX2, fSrcY2, fSrcX3, fSrcY3, fSrcX4, fSrcY4;
+	// 旋转后四个角的坐标（以图像中心为坐标系原点）
+	float fDstX1, fDstY1, fDstX2, fDstY2, fDstX3, fDstY3, fDstX4, fDstY4;
+
+	long lWidth = mybmp[0].GetDimensions().cx; // 获取图像的宽度
+	long lHeight = mybmp[0].GetDimensions().cy; // 获取图像的高度
+
+	// 将旋转角度从度转换到弧度
+	float fRotateAngle = angle; // 旋转角度（弧度）	
+	float fSina, fCosa; // 旋转角度的正弦和余弦	
+	fSina = (float)sin((double)fRotateAngle); // 计算旋转角度的正弦
+	fCosa = (float)cos((double)fRotateAngle); // 计算旋转角度的余弦
+
+	// 计算原图的四个角的坐标（以图像中心为坐标系原点）
+	fSrcX1 = (float)(-lWidth / 2);
+	fSrcY1 = (float)(lHeight / 2);
+	fSrcX2 = (float)(lWidth / 2);
+	fSrcY2 = (float)(lHeight / 2);
+	fSrcX3 = (float)(-lWidth / 2);
+	fSrcY3 = (float)(-lHeight / 2);
+	fSrcX4 = (float)(lWidth / 2);
+	fSrcY4 = (float)(-lHeight / 2);
+
+
+	// 计算新图四个角的坐标（以图像中心为坐标系原点）
+	fDstX1 = fCosa * fSrcX1 + fSina * fSrcY1;
+	fDstY1 = -fSina * fSrcX1 + fCosa * fSrcY1;
+	fDstX2 = fCosa * fSrcX2 + fSina * fSrcY2;
+	fDstY2 = -fSina * fSrcX2 + fCosa * fSrcY2;
+	fDstX3 = fCosa * fSrcX3 + fSina * fSrcY3;
+	fDstY3 = -fSina * fSrcX3 + fCosa * fSrcY3;
+	fDstX4 = fCosa * fSrcX4 + fSina * fSrcY4;
+	fDstY4 = -fSina * fSrcX4 + fCosa * fSrcY4;
+
+	//图像中心
+
+
+	// 计算旋转后的图像实际宽度
+	long lNewWidth = (long)(max(fabs(fDstX4 - fDstX1), fabs(fDstX3 - fDstX2)) + 0.5);
+	// 计算旋转后的图像高度
+	long lNewHeight = (long)(max(fabs(fDstY4 - fDstY1), fabs(fDstY3 - fDstY2)) + 0.5);
+
+	newbmp.CreateCDib(CSize(lNewWidth, lNewHeight), mybmp[0].m_lpBMIH->biBitCount);
+
+	RGBQUAD color;
+
+	// 每行
+	for (int y = 0; y < mybmp[0].GetDimensions().cy; y++)
 	{
-		for (long j = 0; j < (long)newsizey; j++)
+		// 每列
+		for (int x = 0; x < mybmp[0].GetDimensions().cx; x++)
 		{
-			RGBQUAD nowcolor;
-			double prex, prey;
-			double ii = double(i) - newsizex / 2.0;
-			double jj = double(j) - newsizey / 2.0;
-			prex = -(-ii * cos(angle) + jj * sin(angle));
-			prey = ii * sin(angle) + jj * cos(angle);
-			prex = (int)(prex + x / 2.0 + 0.5);
-			prey = (int)(prey + y / 2.0 + 0.5);
-			if (prex >= 0 && prex < x && prey >= 0 && prey < y)
-			{
-				nowcolor = mybmp[0].GetPixel(prex, prey);
-			}
-			else
-			{
-				nowcolor.rgbBlue = nowcolor.rgbGreen = nowcolor.rgbRed = 255;
-			}
-			newbmp.WritePixel(i, j, nowcolor);
+			color = mybmp[0].GetPixel(x, y);
+
+			// 计算该象素在源DIB中的坐标
+			int x0 = fCosa * (x - mybmp[0].GetDimensions().cx / 2.0) + fSina * (y - mybmp[0].GetDimensions().cy / 2.0);
+			int y0 = -fSina * (x - mybmp[0].GetDimensions().cx / 2.0) + fCosa * (y - mybmp[0].GetDimensions().cy / 2.0);
+
+			x0 = x0 + lNewWidth / 2;
+			y0 = y0 + lNewHeight / 2;
+
+
+			newbmp.WritePixel(x0, y0, color);
 		}
 	}
 	Invalidate(TRUE);
