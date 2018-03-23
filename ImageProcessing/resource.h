@@ -121,13 +121,15 @@
 #define ID_32797                        32797
 #define ID_SHIFT                        32798
 #define ID_ROTATE                       32799
+#define ID_MIRROR_H                     32800
+#define ID_MIRROR_V                     32801
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        320
-#define _APS_NEXT_COMMAND_VALUE         32800
+#define _APS_NEXT_COMMAND_VALUE         32802
 #define _APS_NEXT_CONTROL_VALUE         1003
 #define _APS_NEXT_SYMED_VALUE           310
 #endif

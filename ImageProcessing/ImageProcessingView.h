@@ -69,6 +69,8 @@ public:
 	afx_msg void OnMinus();
 	afx_msg void OnShift();
 	afx_msg void OnRotate();
+	afx_msg void OnMirrorH();
+	afx_msg void OnMirrorV();
 };
 
 #ifndef _DEBUG  // ImageProcessingView.cpp 中的调试版本

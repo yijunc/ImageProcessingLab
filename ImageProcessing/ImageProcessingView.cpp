@@ -38,6 +38,8 @@ BEGIN_MESSAGE_MAP(CImageProcessingView, CView)
 		ON_COMMAND(ID_MINUS, &CImageProcessingView::OnMinus)
 		ON_COMMAND(ID_SHIFT, &CImageProcessingView::OnShift)
 		ON_COMMAND(ID_ROTATE, &CImageProcessingView::OnRotate)
+		ON_COMMAND(ID_MIRROR_H, &CImageProcessingView::OnMirrorH)
+	ON_COMMAND(ID_MIRROR_V, &CImageProcessingView::OnMirrorV)
 END_MESSAGE_MAP()
 
 // CImageProcessingView 构造/析构
@@ -493,7 +495,6 @@ void CImageProcessingView::OnRotate()
 	{
 		return;
 	}
-
 	CSize mysize;
 	mysize = mybmp[0].GetDimensions();
 	double x = mysize.cx;
@@ -529,6 +530,58 @@ void CImageProcessingView::OnRotate()
 				nowcolor.rgbBlue = nowcolor.rgbGreen = nowcolor.rgbRed = 255;
 			}
 			newbmp.WritePixel(i, j, nowcolor);
+		}
+	}
+	Invalidate(TRUE);
+}
+
+
+void CImageProcessingView::OnMirrorH()
+{
+	imageCount = 1;
+	if (mybmp[0].IsEmpty())
+	{
+		AfxMessageBox("尚未打开图片！");
+		return;
+	}
+	newbmp.Empty();
+	newbmp.CopyDib(&mybmp[0]);
+	for (long x = 0; x < (long)newbmp.GetDimensions().cx / 2; x++)
+	{
+		for (long y = 0; y < (long)newbmp.GetDimensions().cy; y++)
+		{
+			RGBQUAD color1, color2;
+			color1 = newbmp.GetPixel(x, y);
+			color2 = newbmp.GetPixel(newbmp.GetDimensions().cx - x - 1, y);
+
+			newbmp.WritePixel(newbmp.GetDimensions().cx - x - 1, y, color1);
+			newbmp.WritePixel(x, y, color2);
+		}
+	}
+	Invalidate(TRUE);
+}
+
+
+void CImageProcessingView::OnMirrorV()
+{
+	imageCount = 1;
+	if (mybmp[0].IsEmpty())
+	{
+		AfxMessageBox("尚未打开图片！");
+		return;
+	}
+	newbmp.Empty();
+	newbmp.CopyDib(&mybmp[0]);
+	for (long x = 0; x < (long)newbmp.GetDimensions().cx; x++)
+	{
+		for (long y = 0; y < (long)newbmp.GetDimensions().cy / 2; y++)
+		{
+			RGBQUAD color1, color2;
+			color1 = newbmp.GetPixel(x, y);
+			color2 = newbmp.GetPixel(x, newbmp.GetDimensions().cy - y - 1);
+
+			newbmp.WritePixel(x, newbmp.GetDimensions().cy - y - 1, color1);
+			newbmp.WritePixel(x, y, color2);
 		}
 	}
 	Invalidate(TRUE);

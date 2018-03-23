@@ -222,9 +222,10 @@ BEGIN
         MENUITEM "旋转",                          ID_ROTATE
         POPUP "镜像"
         BEGIN
-            MENUITEM "水平",                          ID_32796
-            MENUITEM "垂直",                          ID_32797
+            MENUITEM "水平",                          ID_MIRROR_H
+            MENUITEM "垂直",                          ID_MIRROR_V
         END
+        MENUITEM SEPARATOR
     END
 END
 
