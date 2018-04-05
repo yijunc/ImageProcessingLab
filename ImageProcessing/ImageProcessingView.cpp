@@ -15,6 +15,7 @@
 #include "RotationDlg.h"
 #include "ShiftDlg.h"
 #include "AboutBox.h"
+#include "ZoomDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -43,6 +44,7 @@ BEGIN_MESSAGE_MAP(CImageProcessingView, CView)
 		ON_COMMAND(ID_MIRROR_H, &CImageProcessingView::OnMirrorH)
 		ON_COMMAND(ID_MIRROR_V, &CImageProcessingView::OnMirrorV)
 		ON_COMMAND(ID_ABOUT, &CImageProcessingView::OnAbout)
+		ON_COMMAND(ID_ZOOM_FORWARD, &CImageProcessingView::OnZoomForward)
 END_MESSAGE_MAP()
 
 // CImageProcessingView 构造/析构
@@ -175,6 +177,11 @@ CImageProcessingDoc* CImageProcessingView::GetDocument() const // 非调试版本是内
 
 // CImageProcessingView 消息处理程序
 
+void CImageProcessingView::OnAbout()
+{
+	CAboutBox aboutBox;
+	aboutBox.DoModal();
+}
 
 void CImageProcessingView::OnOpen()
 {
@@ -348,21 +355,21 @@ void CImageProcessingView::OnBinaryzation()
 	{
 		for (long j = 0; j < (long)newbmp.GetDimensions().cy; j++)
 		{
-			RGBQUAD nowcolor = mybmp[0].GetPixel(i, j);
-			BYTE tem = nowcolor.rgbRed * 0.30 + nowcolor.rgbGreen * 0.59 + nowcolor.rgbBlue * 0.11;
+			RGBQUAD color = mybmp[0].GetPixel(i, j);
+			BYTE tem = color.rgbRed * 0.30 + color.rgbGreen * 0.59 + color.rgbBlue * 0.11;
 			if (tem >= threshold)
 			{
-				nowcolor.rgbGreen = 255;
-				nowcolor.rgbBlue = 255;
-				nowcolor.rgbRed = 255;
+				color.rgbGreen = 255;
+				color.rgbBlue = 255;
+				color.rgbRed = 255;
 			}
 			else
 			{
-				nowcolor.rgbGreen = 0;
-				nowcolor.rgbBlue = 0;
-				nowcolor.rgbRed = 0;
+				color.rgbGreen = 0;
+				color.rgbBlue = 0;
+				color.rgbRed = 0;
 			}
-			newbmp.WritePixel(i, j, nowcolor);
+			newbmp.WritePixel(i, j, color);
 		}
 	}
 	Invalidate(TRUE);
@@ -631,8 +638,97 @@ void CImageProcessingView::OnMirrorV()
 }
 
 
-void CImageProcessingView::OnAbout()
+void CImageProcessingView::OnZoomForward()
 {
-	CAboutBox aboutBox;
-	aboutBox.DoModal();
+	imageCount = 1;
+	if (mybmp[0].IsEmpty())
+	{
+		AfxMessageBox("尚未打开图片！");
+		return;
+	}
+	CZoomDlg zoomDlg;
+	double zoomRatio;
+	if (zoomDlg.DoModal() == IDOK)
+	{
+		zoomRatio = zoomDlg.ratio;
+	}
+	else
+	{
+		return;
+	}
+	newbmp.Empty();
+	CSize mySize = mybmp[0].GetDimensions();
+
+	//计算缩放后图像大小，设立标记数组
+	long x = ((double)(mySize.cx - 1) * zoomRatio + 0.5) + 1;
+	long y = ((double)(mySize.cy - 1) * zoomRatio + 0.5) + 1;
+	int** flag = (int **)malloc(sizeof(int*) * x);
+	for (long i = 0; i < x; i++)
+	{
+		flag[i] = (int *)malloc(sizeof(int*) * y);
+		memset(flag[i], 0, sizeof(int) * y);
+	}
+
+	newbmp.CreateCDib(CSize(x, y), mybmp[0].m_lpBMIH->biBitCount);
+	
+	//前向映射
+	for (long i = 0; i < mySize.cx; i++)
+	{
+		for (long j = 0; j < mySize.cy; j++)
+		{
+			RGBQUAD color;
+			long nx = (double)i * zoomRatio + 0.5;
+			long ny = (double)j * zoomRatio + 0.5;
+			color = mybmp[0].GetPixel(i, j);
+			newbmp.WritePixel(nx, ny, color);
+			flag[nx][ny] = 1;
+		}
+	}
+
+	//邻近补色
+	for (long i = 0; i < x; i++)
+	{
+		for (long j = 0; j < y; j++)
+		{
+			if (!flag[i][j])
+			{
+				int co = 0;
+				int gr = 0, re = 0, bl = 0;
+				RGBQUAD color;
+				for (int z = -1; z < 2; z++)
+				{
+					for (int k = -1; k < 2; k++)
+					{
+						if (i + z < 0 || i + z >= x || j + k < 0 || j + k >= y || (!flag[i + z][j + k]))
+						{
+							continue;
+						}
+						co++;
+						color = newbmp.GetPixel(i + z, j + k);
+						gr += color.rgbGreen;
+						re += color.rgbRed;
+						bl += color.rgbBlue;
+					}
+				}
+				if (co != 0)
+				{
+					gr /= co;
+					re /= co;
+					bl /= co;
+				}
+				color.rgbBlue = bl;
+				color.rgbRed = re;
+				color.rgbGreen = gr;
+				newbmp.WritePixel(i, j, color);
+			}
+		}
+	}
+
+	//释放标记数组内存
+	for (long i = 0; i < x; i++)
+	{
+		free(flag[i]);
+	}
+	free(flag);
+	Invalidate(TRUE);
 }

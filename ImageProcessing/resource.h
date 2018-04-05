@@ -92,6 +92,7 @@
 #define IDD_SHIFT_DLG                   318
 #define IDD_ABOUTBOX1                   319
 #define IDD_ABOUT                       319
+#define IDD_DIALOG1                     321
 #define IDC_EDIT1                       1000
 #define IDC_EDIT2                       1002
 #define ID_32771                        32771
@@ -129,13 +130,22 @@
 #define ID_32803                        32803
 #define ID_ABOUT                        32804
 #define ID_32805                        32805
+#define ID_32806                        32806
+#define ID_32807                        32807
+#define ID_32808                        32808
+#define ID_32809                        32809
+#define ID_ZOOM_FORWARD                 32810
+#define ID_ZOOM_BACKWARD                32811
+#define ID_ZOOM_                        32812
+#define ID_ZOOM_CLOSEST                 32813
+#define ID_ZOOM_BI                      32814
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        321
-#define _APS_NEXT_COMMAND_VALUE         32806
+#define _APS_NEXT_RESOURCE_VALUE        323
+#define _APS_NEXT_COMMAND_VALUE         32815
 #define _APS_NEXT_CONTROL_VALUE         1003
 #define _APS_NEXT_SYMED_VALUE           310
 #endif

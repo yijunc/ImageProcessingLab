@@ -6,6 +6,7 @@
 #include "CDib.h"
 const int MAX_NUM = 5;
 const double pi = 3.1415926535898;
+
 class CImageProcessingView : public CView
 {
 public:
@@ -19,7 +20,7 @@ public:
 	CDib newbmp;
 
 	//读入文件指针
-	CFile ** file;
+	CFile** file;
 
 	//读入图片大小
 	int imageCount;
@@ -72,6 +73,7 @@ public:
 	afx_msg void OnMirrorH();
 	afx_msg void OnMirrorV();
 	afx_msg void OnAbout();
+	afx_msg void OnZoomForward();
 };
 
 #ifndef _DEBUG  // ImageProcessingView.cpp 中的调试版本

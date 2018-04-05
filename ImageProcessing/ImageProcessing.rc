@@ -226,7 +226,12 @@ BEGIN
             MENUITEM "水平",                          ID_MIRROR_H
             MENUITEM "垂直",                          ID_MIRROR_V
         END
-        MENUITEM "缩放",                          ID_32805
+        POPUP "缩放"
+        BEGIN
+            MENUITEM "前向映射（最邻近）",                   ID_ZOOM_FORWARD
+            MENUITEM "后向映射（最邻近）",                   ID_ZOOM_CLOSEST
+            MENUITEM "后向映射（双线性）",                   ID_ZOOM_BI
+        END
         MENUITEM SEPARATOR
     END
 END
@@ -383,6 +388,17 @@ BEGIN
     LTEXT           "10152160137 陈弈君",IDC_STATIC,42,39,114,8
 END
 
+IDD_DIALOG1 DIALOGEX 0, 0, 261, 124
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "缩放倍数"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "确定",IDOK,67,103,50,14
+    PUSHBUTTON      "取消",IDCANCEL,152,103,50,14
+    LTEXT           "请输入缩放倍数（大于等于0）:",IDC_STATIC,41,59,112,8
+    EDITTEXT        IDC_EDIT1,159,56,58,14,ES_AUTOHSCROLL
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -470,6 +486,14 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 70
     END
+
+    IDD_DIALOG1, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 254
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 117
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -500,6 +524,11 @@ BEGIN
 END
 
 IDD_ABOUT AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_DIALOG1 AFX_DIALOG_LAYOUT
 BEGIN
     0
 END
