@@ -12,7 +12,7 @@
 IMPLEMENT_DYNAMIC(CZoomDlg, CDialog)
 
 CZoomDlg::CZoomDlg(CWnd* pParent /*=NULL*/)
-	: CDialog(IDD_DIALOG1, pParent)
+	: CDialog(IDD_ZOOM_DLG, pParent)
 {
 }
 
@@ -40,6 +40,11 @@ END_MESSAGE_MAP()
 void CZoomDlg::OnBnClickedOk()
 {
 	UpdateData(true);
+	if (ratio < 0)
+	{
+		ratio = 0;
+	}
+	UpdateData(false);
 	CDialog::OnOK();
 }
 
@@ -53,10 +58,5 @@ void CZoomDlg::OnBnClickedCancel()
 
 void CZoomDlg::OnEnChangeEdit1()
 {
-	UpdateData(true);
-	if (ratio < 0)
-	{
-		ratio = 0;
-	}
-	UpdateData(false);
+
 }

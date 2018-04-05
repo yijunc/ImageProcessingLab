@@ -13,7 +13,7 @@ public:
 
 	// Dialog Data
 #ifdef AFX_DESIGN_TIME
-	enum { IDD = IDD_DIALOG1 };
+	enum { IDD = IDD_ZOOM_DLG };
 #endif
 
 protected:

@@ -92,7 +92,8 @@
 #define IDD_SHIFT_DLG                   318
 #define IDD_ABOUTBOX1                   319
 #define IDD_ABOUT                       319
-#define IDD_DIALOG1                     321
+#define IDD_ZOOM_DLG                     321
+#define IDD_ZOOM_DLG                    321
 #define IDC_EDIT1                       1000
 #define IDC_EDIT2                       1002
 #define ID_32771                        32771

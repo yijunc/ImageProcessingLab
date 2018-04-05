@@ -74,6 +74,7 @@ public:
 	afx_msg void OnMirrorV();
 	afx_msg void OnAbout();
 	afx_msg void OnZoomForward();
+	afx_msg void OnZoomClosest();
 };
 
 #ifndef _DEBUG  // ImageProcessingView.cpp 中的调试版本
