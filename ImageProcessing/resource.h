@@ -90,6 +90,8 @@
 #define IDD_BZ_DLG                      314
 #define IDD_ROTATION_DLG                316
 #define IDD_SHIFT_DLG                   318
+#define IDD_ABOUTBOX1                   319
+#define IDD_ABOUT                       319
 #define IDC_EDIT1                       1000
 #define IDC_EDIT2                       1002
 #define ID_32771                        32771
@@ -123,13 +125,17 @@
 #define ID_ROTATE                       32799
 #define ID_MIRROR_H                     32800
 #define ID_MIRROR_V                     32801
+#define ID_32802                        32802
+#define ID_32803                        32803
+#define ID_ABOUT                        32804
+#define ID_32805                        32805
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        320
-#define _APS_NEXT_COMMAND_VALUE         32802
+#define _APS_NEXT_RESOURCE_VALUE        321
+#define _APS_NEXT_COMMAND_VALUE         32806
 #define _APS_NEXT_CONTROL_VALUE         1003
 #define _APS_NEXT_SYMED_VALUE           310
 #endif

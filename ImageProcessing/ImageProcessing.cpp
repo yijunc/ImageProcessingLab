@@ -167,6 +167,8 @@ protected:
 // 实现
 protected:
 	DECLARE_MESSAGE_MAP()
+public:
+	afx_msg void OnBnClickedOk();
 };
 
 CAboutDlg::CAboutDlg() : CDialogEx(IDD_ABOUTBOX)
@@ -179,6 +181,7 @@ void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CAboutDlg, CDialogEx)
+	ON_BN_CLICKED(IDOK, &CAboutDlg::OnBnClickedOk)
 END_MESSAGE_MAP()
 
 // 用于运行对话框的应用程序命令
@@ -214,3 +217,9 @@ void CImageProcessingApp::SaveCustomState()
 
 
 
+
+
+void CAboutDlg::OnBnClickedOk()
+{
+	CDialogEx::OnOK();
+}

@@ -71,6 +71,7 @@ public:
 	afx_msg void OnRotate();
 	afx_msg void OnMirrorH();
 	afx_msg void OnMirrorV();
+	afx_msg void OnAbout();
 };
 
 #ifndef _DEBUG  // ImageProcessingView.cpp 中的调试版本

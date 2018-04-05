@@ -8,11 +8,13 @@
 #include "ImageProcessing.h"
 #endif
 
+
 #include "ImageProcessingDoc.h"
 #include "ImageProcessingView.h"
 #include "BzDlg.h"
 #include "RotationDlg.h"
 #include "ShiftDlg.h"
+#include "AboutBox.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -40,6 +42,7 @@ BEGIN_MESSAGE_MAP(CImageProcessingView, CView)
 		ON_COMMAND(ID_ROTATE, &CImageProcessingView::OnRotate)
 		ON_COMMAND(ID_MIRROR_H, &CImageProcessingView::OnMirrorH)
 		ON_COMMAND(ID_MIRROR_V, &CImageProcessingView::OnMirrorV)
+		ON_COMMAND(ID_ABOUT, &CImageProcessingView::OnAbout)
 END_MESSAGE_MAP()
 
 // CImageProcessingView 构造/析构
@@ -283,6 +286,14 @@ void CImageProcessingView::OnChangeColor()
 				color.rgbRed = 255;
 				newbmp.WritePixel(x, y, color);
 			}
+			if (x > 30 && x < 50)
+			{
+				RGBQUAD color;
+				color.rgbBlue = 255;
+				color.rgbGreen = 255;
+				color.rgbRed = 255;
+				newbmp.WritePixel(x, y, color);
+			}
 		}
 	}
 	Invalidate(TRUE);
@@ -495,13 +506,14 @@ void CImageProcessingView::OnRotate()
 	{
 		return;
 	}
+
 	// 源图四个角的坐标（以图像中心为坐标系原点）
 	float fSrcX1, fSrcY1, fSrcX2, fSrcY2, fSrcX3, fSrcY3, fSrcX4, fSrcY4;
 	// 旋转后四个角的坐标（以图像中心为坐标系原点）
 	float fDstX1, fDstY1, fDstX2, fDstY2, fDstX3, fDstY3, fDstX4, fDstY4;
 
-	long lWidth = mybmp[0].GetDimensions().cx; // 获取图像的宽度
-	long lHeight = mybmp[0].GetDimensions().cy; // 获取图像的高度
+	long lWidth = sizeDibDisplay[0].cx; // 获取图像的宽度
+	long lHeight = sizeDibDisplay[0].cy; // 获取图像的高度
 
 	// 将旋转角度从度转换到弧度
 	float fRotateAngle = angle; // 旋转角度（弧度）	
@@ -519,7 +531,6 @@ void CImageProcessingView::OnRotate()
 	fSrcX4 = (float)(lWidth / 2);
 	fSrcY4 = (float)(-lHeight / 2);
 
-
 	// 计算新图四个角的坐标（以图像中心为坐标系原点）
 	fDstX1 = fCosa * fSrcX1 + fSina * fSrcY1;
 	fDstY1 = -fSina * fSrcX1 + fCosa * fSrcY1;
@@ -530,9 +541,6 @@ void CImageProcessingView::OnRotate()
 	fDstX4 = fCosa * fSrcX4 + fSina * fSrcY4;
 	fDstY4 = -fSina * fSrcX4 + fCosa * fSrcY4;
 
-	//图像中心
-
-
 	// 计算旋转后的图像实际宽度
 	long lNewWidth = (long)(max(fabs(fDstX4 - fDstX1), fabs(fDstX3 - fDstX2)) + 0.5);
 	// 计算旋转后的图像高度
@@ -540,27 +548,33 @@ void CImageProcessingView::OnRotate()
 
 	newbmp.CreateCDib(CSize(lNewWidth, lNewHeight), mybmp[0].m_lpBMIH->biBitCount);
 
-	RGBQUAD color;
-
 	// 每行
-	for (int y = 0; y < mybmp[0].GetDimensions().cy; y++)
+	for (int y = 0; y < lNewHeight; y++)
 	{
 		// 每列
-		for (int x = 0; x < mybmp[0].GetDimensions().cx; x++)
+		for (int x = 0; x < lNewWidth; x++)
 		{
-			color = mybmp[0].GetPixel(x, y);
+			RGBQUAD color;
 
-			// 计算该象素在源DIB中的坐标
-			int x0 = fCosa * (x - mybmp[0].GetDimensions().cx / 2.0) + fSina * (y - mybmp[0].GetDimensions().cy / 2.0);
-			int y0 = -fSina * (x - mybmp[0].GetDimensions().cx / 2.0) + fCosa * (y - mybmp[0].GetDimensions().cy / 2.0);
+			//计算新点在原图像上的位置
+			int x0 = (x - lNewWidth / 2) * fCosa - (y - lNewHeight / 2) * fSina + sizeDibDisplay[0].cx / 2.0;
+			int y0 = (x - lNewWidth / 2) * fSina + (y - lNewHeight / 2) * fCosa + sizeDibDisplay[0].cy / 2.0;
 
-			x0 = x0 + lNewWidth / 2;
-			y0 = y0 + lNewHeight / 2;
-
-
-			newbmp.WritePixel(x0, y0, color);
+			if ((x0 >= 0) && (x0 < sizeDibDisplay[0].cx) && (y0 >= 0) && (y0 < sizeDibDisplay[0].cy))
+			{
+				color = mybmp[0].GetPixel(x0, y0);
+			}
+			else
+			{
+				color.rgbGreen = 255;
+				color.rgbRed = 255;
+				color.rgbBlue = 255;
+			}
+			newbmp.WritePixel(x, y, color);
 		}
 	}
+
+
 	Invalidate(TRUE);
 }
 
@@ -614,4 +628,11 @@ void CImageProcessingView::OnMirrorV()
 		}
 	}
 	Invalidate(TRUE);
+}
+
+
+void CImageProcessingView::OnAbout()
+{
+	CAboutBox aboutBox;
+	aboutBox.DoModal();
 }

@@ -207,6 +207,7 @@ BEGIN
         MENUITEM "打开图像",                        ID_OPEN
         MENUITEM "保存图像",                        ID_SAVE
         MENUITEM SEPARATOR
+        MENUITEM "关于此软件",                       ID_ABOUT
     END
     POPUP "图像操作"
     BEGIN
@@ -219,12 +220,13 @@ BEGIN
         MENUITEM "减运算",                         ID_MINUS
         MENUITEM SEPARATOR
         MENUITEM "平移",                          ID_SHIFT
-        MENUITEM "旋转",                          ID_ROTATE
+        MENUITEM "旋转（后向映射）",                    ID_ROTATE
         POPUP "镜像"
         BEGIN
             MENUITEM "水平",                          ID_MIRROR_H
             MENUITEM "垂直",                          ID_MIRROR_V
         END
+        MENUITEM "缩放",                          ID_32805
         MENUITEM SEPARATOR
     END
 END
@@ -322,15 +324,16 @@ END
 // Dialog
 //
 
-IDD_ABOUTBOX DIALOGEX 0, 0, 170, 62
+IDD_ABOUTBOX DIALOGEX 0, 0, 183, 77
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "关于 ImageProcessing"
 FONT 9, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
-    ICON            IDR_MAINFRAME,IDC_STATIC,14,14,21,20
-    LTEXT           "ImageProcessing，1.0 版",IDC_STATIC,42,14,114,8,SS_NOPREFIX
+    ICON            IDR_MAINFRAME,IDC_STATIC,14,14,20,20
+    LTEXT           "数字图像处理",IDC_STATIC,42,14,114,8,SS_NOPREFIX
     LTEXT           "Copyright (C) 2018",IDC_STATIC,42,26,114,8
-    DEFPUSHBUTTON   "确定",IDOK,113,41,50,14,WS_GROUP
+    DEFPUSHBUTTON   "确定",IDOK,126,56,50,14,WS_GROUP
+    LTEXT           "10152160137 陈弈君",IDC_STATIC,42,39,114,8
 END
 
 IDD_BZ_DLG DIALOGEX 0, 0, 241, 103
@@ -366,6 +369,18 @@ BEGIN
     LTEXT           "平移Y方向：",IDC_STATIC,61,63,45,8
     EDITTEXT        IDC_EDIT1,125,39,47,14,ES_AUTOHSCROLL
     EDITTEXT        IDC_EDIT2,125,61,47,14,ES_AUTOHSCROLL
+END
+
+IDD_ABOUT DIALOGEX 0, 0, 183, 77
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "关于 ImageProcessing"
+FONT 9, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    ICON            IDR_MAINFRAME,IDC_STATIC,14,14,20,20
+    LTEXT           "数字图像处理",IDC_STATIC,42,14,114,8,SS_NOPREFIX
+    LTEXT           "Copyright (C) 2018",IDC_STATIC,42,26,114,8
+    DEFPUSHBUTTON   "确定",IDOK,126,56,50,14,WS_GROUP
+    LTEXT           "10152160137 陈弈君",IDC_STATIC,42,39,114,8
 END
 
 
@@ -419,9 +434,9 @@ BEGIN
     IDD_ABOUTBOX, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 163
+        RIGHTMARGIN, 176
         TOPMARGIN, 7
-        BOTTOMMARGIN, 55
+        BOTTOMMARGIN, 70
     END
 
     IDD_BZ_DLG, DIALOG
@@ -447,6 +462,14 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 111
     END
+
+    IDD_ABOUT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 176
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 70
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -467,6 +490,16 @@ BEGIN
 END
 
 IDD_SHIFT_DLG AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_ABOUTBOX AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_ABOUT AFX_DIALOG_LAYOUT
 BEGIN
     0
 END
