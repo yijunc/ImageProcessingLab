@@ -46,6 +46,7 @@ BEGIN_MESSAGE_MAP(CImageProcessingView, CView)
 		ON_COMMAND(ID_ABOUT, &CImageProcessingView::OnAbout)
 		ON_COMMAND(ID_ZOOM_FORWARD, &CImageProcessingView::OnZoomForward)
 		ON_COMMAND(ID_ZOOM_CLOSEST, &CImageProcessingView::OnZoomClosest)
+		ON_COMMAND(ID_ZOOM_BI, &CImageProcessingView::OnZoomBi)
 END_MESSAGE_MAP()
 
 // CImageProcessingView 构造/析构
@@ -785,6 +786,88 @@ void CImageProcessingView::OnZoomClosest()
 			if ((x0 >= 0) && (x0 < sizeDibDisplay[0].cx) && (y0 >= 0) && (y0 < sizeDibDisplay[0].cy))
 			{
 				color = mybmp[0].GetPixel(x0, y0);
+			}
+			else
+			{
+				color.rgbGreen = 255;
+				color.rgbRed = 255;
+				color.rgbBlue = 255;
+			}
+			newbmp.WritePixel(x, y, color);
+		}
+	}
+
+	Invalidate(TRUE);
+}
+
+
+void CImageProcessingView::OnZoomBi()
+{
+	imageCount = 1;
+
+	if (mybmp[0].IsEmpty())
+	{
+		AfxMessageBox("尚未打开图片！");
+		return;
+	}
+	CZoomDlg zoomDlg;
+	double zoomRatio;
+	if (zoomDlg.DoModal() == IDOK)
+	{
+		zoomRatio = zoomDlg.ratio;
+	}
+	else
+	{
+		return;
+	}
+	newbmp.Empty();
+
+	// 缩放比率
+	float fXZoomRatio, fYZoomRatio;
+	fXZoomRatio = fYZoomRatio = zoomRatio;
+
+	// 源图像的宽度和高度
+	long lWidth = sizeDibDisplay[0].cx; // 获取图像的宽度
+	long lHeight = sizeDibDisplay[0].cy; // 获取图像的高度
+
+	// 缩放后图像的宽度和高度
+	long lNewWidth = (long)(lWidth * fXZoomRatio + 0.5);
+	long lNewHeight = (long)(lHeight * fYZoomRatio + 0.5);
+
+	newbmp.CreateCDib(CSize(lNewWidth, lNewHeight), mybmp[0].m_lpBMIH->biBitCount);
+
+	// 每列
+	for (int x = 0; x < lNewWidth; x++)
+	{
+		// 每行
+		for (int y = 0; y < lNewHeight; y++)
+		{
+			RGBQUAD color;
+
+			//计算新点在原图像上的位置
+			float cx = x / fXZoomRatio;
+			float cy = y / fYZoomRatio;
+
+			if (((int)(cx) - 1) >= 0 && ((int)(cx) + 1) < sizeDibDisplay[0].cx && ((int)(cy) - 1) >= 0 && ((int)(cy) + 1) <
+				sizeDibDisplay[0].cy)
+			{
+				float u = cx - (int)cx;
+				float v = cy - (int)cy;
+				int i = (int)cx;
+				int j = (int)cy;
+
+				int Green = (1 - u) * (1 - v) * mybmp[0].GetPixel(i, j).rgbGreen + (1 - u) * v * mybmp[0].GetPixel(i, j + 1).rgbGreen
+					+ u * (1 - v) * mybmp[0].GetPixel(i + 1, j).rgbGreen + u * v * mybmp[0].GetPixel(i + 1, j + 1).rgbGreen;
+
+				int Blue = (1 - u) * (1 - v) * mybmp[0].GetPixel(i, j).rgbBlue + (1 - u) * v * mybmp[0].GetPixel(i, j + 1).rgbBlue
+					+ u * (1 - v) * mybmp[0].GetPixel(i + 1, j).rgbBlue + u * v * mybmp[0].GetPixel(i + 1, j + 1).rgbBlue;
+
+				int Red = (1 - u) * (1 - v) * mybmp[0].GetPixel(i, j).rgbRed + (1 - u) * v * mybmp[0].GetPixel(i, j + 1).rgbRed
+					+ u * (1 - v) * mybmp[0].GetPixel(i + 1, j).rgbRed + u * v * mybmp[0].GetPixel(i + 1, j + 1).rgbRed;
+
+				color.rgbGreen = Green;
+				color.rgbRed = Red;
+				color.rgbBlue = Blue;
 			}
 			else
 			{
