@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CDib.h"
+#include <complex>
 const int MAX_NUM = 5;
 const double pi = 3.1415926535898;
 
@@ -76,6 +77,13 @@ public:
 	afx_msg void OnZoomForward();
 	afx_msg void OnZoomClosest();
 	afx_msg void OnZoomBi();
+	afx_msg void OnFft();
+	void FFT_2D(std::complex<double>* pCTData, int nWidth, int nHeight, std::complex<double>* pCFData);
+	void IFFT_2D(std::complex<double>* pCFData, std::complex<double>* pCTData, int nWidth, int nHeight);
+	void FFT_1D(std::complex<double>* pCTData, std::complex<double>* pCFData, int nLevel);
+	void IFFT_1D(std::complex<double>* pCFData, std::complex<double>* pCTData, int nLevel);
+	void fourier(std::complex<double>* data, int nTransHeight, int nTransWidth, int isign);
+	afx_msg void OnIfft();
 };
 
 #ifndef _DEBUG  // ImageProcessingView.cpp 中的调试版本

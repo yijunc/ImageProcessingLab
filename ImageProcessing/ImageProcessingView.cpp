@@ -16,6 +16,7 @@
 #include "ShiftDlg.h"
 #include "AboutBox.h"
 #include "ZoomDlg.h"
+#include <complex>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -47,6 +48,8 @@ BEGIN_MESSAGE_MAP(CImageProcessingView, CView)
 		ON_COMMAND(ID_ZOOM_FORWARD, &CImageProcessingView::OnZoomForward)
 		ON_COMMAND(ID_ZOOM_CLOSEST, &CImageProcessingView::OnZoomClosest)
 		ON_COMMAND(ID_ZOOM_BI, &CImageProcessingView::OnZoomBi)
+		ON_COMMAND(ID_FFT, &CImageProcessingView::OnFft)
+	ON_COMMAND(ID_IFFT, &CImageProcessingView::OnIfft)
 END_MESSAGE_MAP()
 
 // CImageProcessingView 构造/析构
@@ -856,7 +859,8 @@ void CImageProcessingView::OnZoomBi()
 				int i = (int)cx;
 				int j = (int)cy;
 
-				int Green = (1 - u) * (1 - v) * mybmp[0].GetPixel(i, j).rgbGreen + (1 - u) * v * mybmp[0].GetPixel(i, j + 1).rgbGreen
+				int Green = (1 - u) * (1 - v) * mybmp[0].GetPixel(i, j).rgbGreen + (1 - u) * v * mybmp[0]
+				                                                                                 .GetPixel(i, j + 1).rgbGreen
 					+ u * (1 - v) * mybmp[0].GetPixel(i + 1, j).rgbGreen + u * v * mybmp[0].GetPixel(i + 1, j + 1).rgbGreen;
 
 				int Blue = (1 - u) * (1 - v) * mybmp[0].GetPixel(i, j).rgbBlue + (1 - u) * v * mybmp[0].GetPixel(i, j + 1).rgbBlue
@@ -876,6 +880,570 @@ void CImageProcessingView::OnZoomBi()
 				color.rgbBlue = 255;
 			}
 			newbmp.WritePixel(x, y, color);
+		}
+	}
+
+	Invalidate(TRUE);
+}
+
+
+void CImageProcessingView::OnFft()
+{
+	imageCount = 1;
+
+	if (mybmp[0].IsEmpty())
+	{
+		AfxMessageBox("尚未打开图片！");
+		return;
+	}
+	newbmp.Empty();
+
+	int width = sizeDibDisplay[0].cx;
+	int height = sizeDibDisplay[0].cy;
+	int i, j;
+
+	double dTmpOne; // 临时变量 
+	double dTmpTwo;
+
+
+	int nTransWidth;
+	int nTransHeight;
+
+	// 计算进行傅立叶变换的宽度 （2的整数次幂） 
+	dTmpOne = log(width) / log(2);
+	dTmpTwo = ceil(dTmpOne);
+	dTmpTwo = pow(2, dTmpTwo);
+	nTransWidth = (int)dTmpTwo; // 
+
+	// 计算进行傅立叶变换的高度 （2的整数次幂） 
+	dTmpOne = log(height) / log(2);
+	dTmpTwo = ceil(dTmpOne);
+	dTmpTwo = pow(2, dTmpTwo);
+	nTransHeight = (int)dTmpTwo;
+
+	std::complex<double>* t = new std::complex<double>[nTransHeight * nTransWidth];
+
+	CSize fftsize;
+	fftsize = CSize(nTransWidth, nTransHeight);
+
+	newbmp.CreateCDib(fftsize, mybmp[0].m_lpBMIH->biBitCount);
+
+	for (j = 0; j < nTransHeight; j++)
+		for (i = 0; i < nTransWidth; i++)
+		{
+			int position = j * nTransWidth + i;
+			if (i < width && j < height)
+			{
+				RGBQUAD color;
+				color = mybmp[0].GetPixel(i, j);
+
+				t[position] = std::complex<double>(color.rgbRed, 0.0); //赋予强度值
+			}
+			else
+			{
+				t[position] = std::complex<double>(0.0, 0.0);
+			}
+		}
+
+	//傅里叶变换
+	fourier(t, nTransHeight, nTransWidth, 1);
+
+
+	double* tmp = new double[nTransWidth * nTransHeight];
+
+
+	for (int x = 0; x < nTransWidth; x++)
+	{
+		for (int y = 0; y < nTransHeight; y++)
+		{
+			RGBQUAD color;
+			int pos = y * nTransWidth + x;
+
+			double dTemp = sqrt(t[pos].real() * t[pos].real() +
+				t[pos].imag() * t[pos].imag()) / 100;
+
+			int gray;
+
+			if (dTemp > 255)
+			{
+				gray = 255;
+			}
+			else
+				gray = (int)dTemp;
+
+
+			color.rgbGreen = gray;
+			color.rgbRed = gray;
+			color.rgbBlue = gray;
+
+			newbmp.WritePixel(x < nTransWidth / 2 ? x + nTransWidth / 2 : x - nTransWidth / 2,
+			                  y < nTransHeight / 2 ? y + nTransHeight / 2 : y - nTransHeight / 2, color);
+		}
+	}
+
+	Invalidate(TRUE);
+}
+
+/*************************************************************************
+*
+* \函数名称：
+*   FFT_2D()
+*
+* \输入参数:
+*   complex<double> * pCTData - 图像数据
+*   int    nWidth - 数据宽度
+*   int    nHeight - 数据高度
+*   complex<double> * pCFData - 傅立叶变换后的结果
+*
+* \返回值:
+*   无
+*
+* \说明:
+*   二维傅立叶变换。
+*
+************************************************************************
+*/
+void CImageProcessingView::FFT_2D(std::complex<double>* pCTData, int nWidth, int nHeight, std::complex<double>* pCFData)
+{
+	int x, y;
+	int nTransWidth = nWidth;
+	int nTransHeight = nHeight;
+
+	// x，y（行列）方向上的迭代次数 
+	int nXLev;
+	int nYLev;
+
+	/*	while(nWidth * 2 <= sizeimage.cx)
+	{
+	nWidth *= 2;
+	nYLev++;
+	}
+	while(nHeight * 2 <= sizeimage.cy)
+	{
+	nHeight *= 2;
+	nXLev++;
+	}*/
+	// 计算x，y（行列）方向上的迭代次数 
+	nXLev = (int)(log(nTransWidth) / log(2) + 0.5);
+	nYLev = (int)(log(nTransHeight) / log(2) + 0.5);
+
+	for (y = 0; y < nTransHeight; y++)
+	{
+		// y方向进行快速傅立叶变换 
+		FFT_1D(&pCTData[nTransWidth * y], &pCFData[nTransWidth * y], nXLev);
+	}
+
+	// pCFData中目前存储了pCTData经过行变换的结果 
+	// 为了直接利用FFT_1D，需要把pCFData的二维数据转置，再一次利用FFT_1D进行 
+	// 傅立叶行变换（实际上相当于对列进行傅立叶变换） 
+	for (y = 0; y < nTransHeight; y++)
+	{
+		for (x = 0; x < nTransWidth; x++)
+		{
+			pCTData[nTransHeight * x + y] = pCFData[nTransWidth * y + x];
+		}
+	}
+
+	for (y = 0; y < nTransWidth; y++)
+	{
+		// 对x方向进行快速傅立叶变换，实际上相当于对原来的图象数据进行列方向的 
+		// 傅立叶变换 
+		FFT_1D(&pCTData[y * nTransHeight], &pCFData[y * nTransHeight], nYLev);
+	}
+
+	// pCFData中目前存储了pCTData经过二维傅立叶变换的结果，但是为了方便列方向 
+	// 的傅立叶变换，对其进行了转置，现在把结果转置回来 
+	for (y = 0; y < nTransHeight; y++)
+	{
+		for (x = 0; x < nTransWidth; x++)
+		{
+			pCTData[nTransWidth * y + x] = pCFData[nTransHeight * x + y];
+		}
+	}
+
+	memcpy(pCTData, pCFData, sizeof(std::complex<double>) * nTransHeight * nTransWidth);
+}
+
+/*************************************************************************
+*
+* \函数名称：
+*   IFFT_2D()
+*
+* \输入参数:
+*   complex<double> * pCFData - 频域数据
+*   complex<double> * pCTData - 时域数据
+*   int    nWidth - 图像数据宽度
+*   int    nHeight - 图像数据高度
+*
+* \返回值:
+*   无
+*
+* \说明:
+*   二维傅立叶反变换。
+*
+************************************************************************
+*/
+void CImageProcessingView::IFFT_2D(std::complex<double>* pCFData, std::complex<double>* pCTData, int nWidth,
+                                   int nHeight)
+{
+	// 循环控制变量 
+	int x;
+	int y;
+
+	int nTransWidth = nWidth;
+	int nTransHeight = nHeight;
+
+	// 分配工作需要的内存空间 
+	std::complex<double>* pCWork = new std::complex<double>[nTransWidth * nTransHeight];
+
+	//临时变量 
+	std::complex<double>* pCTmp;
+
+	// 为了利用傅立叶正变换,可以把傅立叶频域的数据取共轭 
+	// 然后直接利用正变换，输出结果就是傅立叶反变换结果的共轭 
+	for (y = 0; y < nTransHeight; y++)
+	{
+		for (x = 0; x < nTransWidth; x++)
+		{
+			pCTmp = &pCFData[nTransWidth * y + x];
+			pCWork[nTransWidth * y + x] = std::complex<double>(pCTmp->real(), -pCTmp->imag());
+		}
+	}
+
+	// 调用傅立叶正变换 
+	FFT_2D(pCWork, nWidth, nHeight, pCTData);
+
+	// 求时域点的共轭，求得最终结果 
+	// 根据傅立叶变换原理，利用这样的方法求得的结果和实际的时域数据 
+	// 相差一个系数 
+	for (y = 0; y < nTransHeight; y++)
+	{
+		for (x = 0; x < nTransWidth; x++)
+		{
+			pCTmp = &pCTData[nTransWidth * y + x];
+			pCTData[nTransWidth * y + x] =
+				std::complex<double>(pCTmp->real() / (nTransWidth * nTransHeight),
+				                     -pCTmp->imag() / (nTransWidth * nTransHeight));
+		}
+	}
+	delete pCWork;
+	pCWork = NULL;
+}
+
+/*************************************************************************
+*
+* \函数名称：
+*   FFT_1D()
+*
+* \输入参数:
+*   complex<double> * pCTData - 指向时域数据的指针，输入的需要变换的数据
+*   complex<double> * pCFData - 指向频域数据的指针，输出的经过变换的数据
+*   nLevel －傅立叶变换蝶形算法的级数，2的幂数，
+*
+* \返回值:
+*   无
+*
+* \说明:
+*   一维快速傅立叶变换。
+*
+*************************************************************************
+*/
+
+void CImageProcessingView::FFT_1D(std::complex<double>* pCTData, std::complex<double>* pCFData, int nLevel)
+{
+	// 循环控制变量 */
+	int i;
+	int j;
+	int k;
+
+	//double PI = 3.1415926;  
+
+	// 傅立叶变换点数 
+	int nCount = 0;
+
+	// 计算傅立叶变换点数 
+	nCount = 1 << nLevel;
+
+	// 某一级的长度 
+	int nBtFlyLen;
+	nBtFlyLen = 0;
+
+	// 变换系数的角度 ＝2 * PI * i / nCount 
+	double dAngle;
+
+	std::complex<double>* pCW;
+
+	// 分配内存，存储傅立叶变化需要的系数表 
+	pCW = new std::complex<double>[nCount / 2];
+
+	// 计算傅立叶变换的系数 
+	for (i = 0; i < nCount / 2; i++)
+	{
+		dAngle = -2 * 3.141592 * i / nCount;
+		pCW[i] = std::complex<double>(cos(dAngle), sin(dAngle));
+	}
+
+	// 变换需要的工作空间 
+	std::complex<double> *pCWork1, *pCWork2;
+
+	// 分配工作空间 
+	pCWork1 = new std::complex<double>[nCount];
+
+	pCWork2 = new std::complex<double>[nCount];
+
+
+	// 临时变量 
+	std::complex<double>* pCTmp;
+
+	// 初始化，写入数据 
+	memcpy(pCWork1, pCTData, sizeof(std::complex<double>) * nCount);
+
+	// 临时变量 
+	int nInter;
+	nInter = 0;
+
+	// 蝶形算法进行快速傅立叶变换 
+	for (k = 0; k < nLevel; k++)
+	{
+		for (j = 0; j < (int)pow(2, k); j++)
+		{
+			//计算长度 
+			nBtFlyLen = (int)pow(2, (nLevel - k));
+
+			//倒序重排，加权计算 
+			for (i = 0; i < nBtFlyLen / 2; i++)
+			{
+				nInter = j * nBtFlyLen;
+				pCWork2[i + nInter] =
+					pCWork1[i + nInter] + pCWork1[i + nInter + nBtFlyLen / 2];
+				pCWork2[i + nInter + nBtFlyLen / 2] =
+					(pCWork1[i + nInter] - pCWork1[i + nInter + nBtFlyLen / 2])
+					* pCW[(int)(i * pow(2, k))];
+			}
+		}
+
+		// 交换 pCWork1和pCWork2的数据 
+		pCTmp = pCWork1;
+		pCWork1 = pCWork2;
+		pCWork2 = pCTmp;
+	}
+
+	// 重新排序 
+	for (j = 0; j < nCount; j++)
+	{
+		nInter = 0;
+		for (i = 0; i < nLevel; i++)
+		{
+			if (j & (1 << i))
+			{
+				nInter += 1 << (nLevel - i - 1);
+			}
+		}
+		pCFData[j] = pCWork1[nInter];
+	}
+
+	// 释放内存空间 
+	delete pCW;
+	delete pCWork1;
+	delete pCWork2;
+	pCW = NULL;
+	pCWork1 = NULL;
+	pCWork2 = NULL;
+}
+
+/*************************************************************************
+
+* \函数名称：
+*    IFFT_1D()
+*
+* \输入参数:
+*   complex<double> * pCTData - 指向时域数据的指针，输入的需要反变换的数据
+*   complex<double> * pCFData - 指向频域数据的指针，输出的经过反变换的数据
+*   nLevel －傅立叶变换蝶形算法的级数，2的幂数，
+*
+* \返回值:
+*   无
+*
+* \说明:
+*   一维快速傅立叶反变换。
+*
+************************************************************************
+*/
+void CImageProcessingView::IFFT_1D(std::complex<double>* pCFData, std::complex<double>* pCTData, int nLevel)
+{
+	// 循环控制变量 
+	int i;
+
+	// 傅立叶反变换点数 
+	int nCount;
+
+	// 计算傅立叶变换点数 
+	//nCount = (int)pow(2,nLevel) ; 
+	nCount = 1 << nLevel;
+	// 变换需要的工作空间 
+	std::complex<double>* pCWork;
+
+	// 分配工作空间 
+	pCWork = new std::complex<double>[nCount];
+
+	// 将需要反变换的数据写入工作空间pCWork 
+	memcpy(pCWork, pCFData, sizeof(std::complex<double>) * nCount);
+
+	// 为了利用傅立叶正变换,可以把傅立叶频域的数据取共轭 
+	// 然后直接利用正变换，输出结果就是傅立叶反变换结果的共轭 
+	for (i = 0; i < nCount; i++)
+	{
+		pCWork[i] = std::complex<double>(pCWork[i].real(), -pCWork[i].imag());
+	}
+
+	// 调用快速傅立叶变换实现反变换，结果存储在pCTData中 
+	FFT_1D(pCWork, pCTData, nLevel);
+
+	// 求时域点的共轭，求得最终结果 
+	// 根据傅立叶变换原理，利用这样的方法求得的结果和实际的时域数据 
+	// 相差一个系数nCount 
+	for (i = 0; i < nCount; i++)
+	{
+		pCTData[i] =
+			std::complex<double>(pCTData[i].real() / nCount, -pCTData[i].imag() / nCount);
+	}
+
+	// 释放内存 
+	delete pCWork;
+	pCWork = NULL;
+}
+
+//////////////////////////////////////////////////////////////
+//该函数用来实现二维傅立叶变换
+//参数height、width分别表示图象的高度和宽度，ising表示正反变换
+//////////////////////////////////////////////////////////////
+void CImageProcessingView::fourier(std::complex<double>* data, int nTransHeight, int nTransWidth, int isign)
+{
+	std::complex<double>* pCTData = new std::complex<double>[nTransHeight * nTransWidth];
+	std::complex<double>* pCFData = new std::complex<double>[nTransHeight * nTransWidth];
+
+	if (isign == 1)
+	{
+		for (int j = 0; j < nTransHeight; j++)
+			for (int i = 0; i < nTransWidth; i++)
+			{
+				pCTData[j * nTransWidth + i] = data[j * nTransWidth + i];
+			}
+		FFT_2D(pCTData, nTransWidth, nTransHeight, pCFData);
+
+		for (int i = 0; i < nTransWidth; i++)
+			for (int j = 0; j < nTransHeight; j++)
+				data[j * nTransWidth + i] = pCFData[j * nTransWidth + i];
+	}
+	else if (isign == -1)
+	{
+		for (int j = 0; j < nTransHeight; j++)
+			for (int i = 0; i < nTransWidth; i++)
+			{
+				pCFData[j * nTransWidth + i] = data[j * nTransWidth + i];
+			}
+		IFFT_2D(pCFData, pCTData, nTransWidth, nTransHeight);
+		for (int i = 0; i < nTransWidth; i++)
+			for (int j = 0; j < nTransHeight; j++)
+			{
+				data[j * nTransWidth + i] = pCTData[j * nTransWidth + i];
+			}
+	}
+}
+
+
+void CImageProcessingView::OnIfft()
+{
+	imageCount = 1;
+
+	if (mybmp[0].IsEmpty())
+	{
+		AfxMessageBox("尚未打开图片！");
+		return;
+	}
+	newbmp.Empty();
+
+	int width = sizeDibDisplay[0].cx;
+	int height = sizeDibDisplay[0].cy;
+	int i, j;
+
+
+	double dTmpOne; // 临时变量 
+	double  dTmpTwo;
+
+	int nTransWidth;
+	int  nTransHeight;
+
+	// 计算进行傅立叶变换的宽度 （2的整数次幂） 
+	dTmpOne = log(width) / log(2);
+	dTmpTwo = ceil(dTmpOne);
+	dTmpTwo = pow(2, dTmpTwo);
+	nTransWidth = (int)dTmpTwo; // 
+
+								// 计算进行傅立叶变换的高度 （2的整数次幂） 
+	dTmpOne = log(height) / log(2);
+	dTmpTwo = ceil(dTmpOne);
+	dTmpTwo = pow(2, dTmpTwo);
+	nTransHeight = (int)dTmpTwo;
+
+	std::complex<double> *t = new std::complex<double>[nTransHeight*nTransWidth];
+
+	CSize fftsize;
+	fftsize = CSize(nTransWidth, nTransHeight);
+
+	newbmp.CreateCDib(fftsize, mybmp[0].m_lpBMIH->biBitCount);
+
+	for (j = 0; j<nTransHeight; j++)
+		for (i = 0; i<nTransWidth; i++)
+		{
+
+			int position = j*nTransWidth + i;
+			if (i<width &&j<height)
+			{
+				RGBQUAD color;
+				color = mybmp[0].GetPixel(i, j);
+
+				t[position] = std::complex<double>(color.rgbRed, 0.0);  //赋予强度值
+
+			}
+			else
+			{
+				t[position] = std::complex<double>(0.0, 0.0);
+			}
+		}
+
+	//傅里叶变换
+	fourier(t, nTransHeight, nTransWidth, 1);
+
+	//傅里叶反变换
+	fourier(t, nTransHeight, nTransWidth, -1);
+
+
+	newbmp.CreateCDib(fftsize, mybmp[0].m_lpBMIH->biBitCount);
+
+	double max = 0.0;
+	for (j = 0; j<nTransHeight; j++)
+		for (i = 0; i<nTransWidth; i++)
+		{
+			if (max<t[nTransWidth*j + i].real())
+				max = t[nTransWidth*j + i].real();
+		}
+
+
+	for (j = 0; j<nTransHeight; j++)
+	{
+		for (i = 0; i<nTransWidth; i++)
+		{
+			if (i<width &&j<height)
+			{
+
+				int gray = sqrt(t[nTransWidth*j + i].real()*t[nTransWidth*j + i].real() + t[nTransWidth*j + i].imag()*t[nTransWidth*j + i].imag());
+				RGBQUAD color;
+				color.rgbBlue = gray * 255 / max;
+				color.rgbGreen = gray * 255 / max;
+				color.rgbRed = gray * 255 / max;
+				newbmp.WritePixel(i, j, color);
+			}
 		}
 	}
 

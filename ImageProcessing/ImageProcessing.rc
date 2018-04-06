@@ -233,6 +233,13 @@ BEGIN
             MENUITEM "后向映射（双线性）",                   ID_ZOOM_BI
         END
         MENUITEM SEPARATOR
+        MENUITEM "FFT",                         ID_FFT
+        MENUITEM "IFFT",                        ID_IFFT
+        MENUITEM SEPARATOR
+    END
+    POPUP "综合操作"
+    BEGIN
+        MENUITEM "抠图拼接",                        ID_32817
     END
 END
 
