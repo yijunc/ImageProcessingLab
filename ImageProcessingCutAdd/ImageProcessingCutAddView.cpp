@@ -212,6 +212,7 @@ void CImageProcessingCutAddView::OnOpen1()
 	//绘制选择框
 	m_tracker.Draw(&dc, &pen);
 
+	//设定状态
 	state = 1;
 
 	Invalidate(TRUE);
@@ -253,6 +254,7 @@ void CImageProcessingCutAddView::OnOpen2()
 	sizeImage2 = myBmp2.GetDimensions();
 	//初始化掩模
 	tmp2.CreateCDib(sizeImage2, myBmp2.m_lpBMIH->biBitCount);
+	//设定状态
 	state = 1;
 	Invalidate(TRUE);
 }
@@ -260,25 +262,24 @@ void CImageProcessingCutAddView::OnOpen2()
 
 void CImageProcessingCutAddView::OnLButtonDown(UINT nFlags, CPoint point)
 {
-	if (ok)
+	//已完成或者图像未二值化时不可操作
+	if (ok || state == 1)
 		return;
 
-	//int ret=m_RectTracker.HitTest(point);
 	int nIn; //定义一个鼠标的点击值；
 	nIn = m_tracker.HitTest(point); //看看点到了哪了
 
-	CRect Prect1; //定义图片的矩形
 	CRect Trect; //定义橡皮筋框的矩形
 	CRect Prect; //图片矩形框
 
-	Prect1.left = m_origin1.x; //得到图片的矩形大小
-	Prect1.top = m_origin1.y;
-	Prect1.right = sizeImage1.cx;
-	Prect1.bottom = sizeImage1.cy;
+	//得到图片的矩形大小，此处大小为相对窗口位置
+	Prect.left = m_origin1.x;
+	Prect.top = m_origin1.y;
+	Prect.right = sizeImage1.cx;
+	Prect.bottom = sizeImage1.cy;
 
-	//ScreenToClient(&Prect1); //将图片框的绝对矩形大小
-
-	if (point.x < Prect1.left || point.x > Prect1.right || point.y < Prect1.top || point.y > Prect1.bottom)
+	//CPoint传入也为相对窗口位置
+	if (point.x < Prect.left || point.x > Prect.right || point.y < Prect.top || point.y > Prect.bottom)
 	{
 		return; //判断是否在图片框内，不处理不在图片框内的点击
 	}
@@ -288,11 +289,6 @@ void CImageProcessingCutAddView::OnLButtonDown(UINT nFlags, CPoint point)
 	{
 		Invalidate(true);
 		m_tracker.TrackRubberBand(this, point, false); //不在矩形框内则画橡皮筋框    
-
-		Prect.left = m_origin1.x;
-		Prect.top = m_origin1.y;
-		Prect.right = sizeImage1.cx;
-		Prect.bottom = sizeImage1.cy;
 
 		Trect = m_tracker.m_rect; //得到画好的橡皮筋框
 
@@ -315,19 +311,19 @@ void CImageProcessingCutAddView::OnLButtonDown(UINT nFlags, CPoint point)
 	{
 		Invalidate(); //重画界面
 		CClientDC dc(this);
-		Prect.left = m_origin1.x;
-		Prect.top = m_origin1.y;
-		Prect.right = sizeImage1.cx;
-		Prect.bottom = sizeImage1.cy;
 
+		//api函数，将鼠标限制在图片框内     
+		//由于鼠标限制为相对系统屏幕坐标，此处需要进行转换
 		ClientToScreen(&Prect);
-		ClipCursor(&Prect); //api函数，将鼠标限制在图片框内     
+		ClipCursor(&Prect); 
 
+		//画tracker
 		m_tracker.Draw(&dc, &pen);
 		Invalidate(false);
 		m_tracker.Track(this, point, false);
-		Trect = m_tracker.m_rect; //得到画好的橡皮筋框
 
+		//得到画好的橡皮筋框，此处获得的tracker矩形坐标为相对窗口坐标
+		Trect = m_tracker.m_rect; 
 		ScreenToClient(&Prect);
 
 		if (Trect.top < Prect.top) //调整矩形框的位置
@@ -356,10 +352,13 @@ void CImageProcessingCutAddView::OnLButtonDown(UINT nFlags, CPoint point)
 		}
 		//设置矩形框大小
 		m_tracker.m_rect.SetRect(Trect.left, Trect.top, Trect.right, Trect.bottom);
+		
+		//更新结果缓存与tracker矩形
 		UpdateImage();
 		m_tracker.Draw(&dc, &pen);
-		Invalidate(false);
-		ClipCursor(NULL); //释放对鼠标的限制
+		Invalidate(TRUE);
+		//释放对鼠标的限制
+		ClipCursor(NULL); 
 	}
 	CView::OnLButtonDown(nFlags, point);
 }
@@ -379,20 +378,22 @@ void CImageProcessingCutAddView::ScaleImage(float scalex, float scaley)
 	TRACE("end2.x: %d\n", end2.y);
 	for (int x = 0; x < newSize.cx; x++)
 	{
-		// 每行
 		for (int y = 0; y < newSize.cy; y++)
 		{
 			RGBQUAD color;
-
+			//后向映射
 			int x0 = (long)(x * 1.0 / scalex + 0.5);
 			int y0 = (long)(y * 1.0 / scaley + 0.5);
+			//确保原图像位置合法
 			if (x0 >= 0 && x0 < end2.x - start2.x + 1 && y0 >= 0 && y0 < end2.y - start2.y + 1)
 			{
 				color = tmp2.GetPixel(x0 + start2.x, y0 + start2.y);
+				//判断掩模是否有效
 				if (color.rgbRed == 255 && color.rgbGreen == 255 && color.rgbBlue == 255)
 				{
 					RGBQUAD colorReal;
 					colorReal = myBmp2.GetPixel(x0 + start2.x, y0 + start2.y);
+					//颜色映射
 					tmp1.WritePixel(start1.x + x, start1.y + y, colorReal);
 				}
 			}
@@ -402,11 +403,14 @@ void CImageProcessingCutAddView::ScaleImage(float scalex, float scaley)
 
 void CImageProcessingCutAddView::UpdateImage()
 {
+	//获得图像二的掩模在图像一的大小
 	start1.x = m_tracker.m_rect.left;
 	start1.y = m_tracker.m_rect.top;
 	end1.x = m_tracker.m_rect.right;
 	end1.y = m_tracker.m_rect.bottom;
+	//刷新缓存结果
 	tmp1.CopyDib(&myBmp1);
+	//计算缩放倍数
 	float scalex = (end1.x - start1.x + 1) * 1.0 / (end2.x - start2.x + 1);
 	float scaley = (end1.y - start1.y + 1) * 1.0 / (end2.y - start2.y + 1);
 	ScaleImage(scalex, scaley);

@@ -16,43 +16,30 @@ DECLARE_DYNCREATE(CImageProcessingCutAddView)
 public:
 	//第一幅图像
 	CDib myBmp1;
-
 	//第二幅图像
 	CDib myBmp2;
-
 	//第一幅图像大小
 	CSize sizeImage1;
-
 	//第二幅图像大小
 	CSize sizeImage2;
-
 	//第一幅画面绘制位置
 	CPoint m_origin1;
-
 	//第二幅画面绘制位置
 	CPoint m_origin2;
-
 	//矩形框
 	CMyTracker m_tracker;
-
 	//边界画笔
 	CPen pen;
-
 	//合成临时结果
 	CDib tmp1;
-
 	//掩模
 	CDib tmp2;
-
 	//前景在第一幅图中起始点
 	CPoint start1, end1;
-
 	//前景在第二幅中的起始点
 	CPoint start2, end2;
-
 	//状态
 	int state;
-
 	//确认标识
 	bool ok;
 
