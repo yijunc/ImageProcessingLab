@@ -191,6 +191,7 @@
     <ClInclude Include="ImageProcessingDoc.h" />
     <ClInclude Include="ImageProcessingView.h" />
     <ClInclude Include="MainFrm.h" />
+    <ClInclude Include="MyTracker.h" />
     <ClInclude Include="OutputWnd.h" />
     <ClInclude Include="PropertiesWnd.h" />
     <ClInclude Include="Resource.h" />
@@ -211,6 +212,7 @@
     <ClCompile Include="ImageProcessingDoc.cpp" />
     <ClCompile Include="ImageProcessingView.cpp" />
     <ClCompile Include="MainFrm.cpp" />
+    <ClCompile Include="MyTracker.cpp" />
     <ClCompile Include="OutputWnd.cpp" />
     <ClCompile Include="PropertiesWnd.cpp" />
     <ClCompile Include="RotationDlg.cpp" />

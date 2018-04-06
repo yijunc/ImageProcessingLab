@@ -49,7 +49,7 @@ BEGIN_MESSAGE_MAP(CImageProcessingView, CView)
 		ON_COMMAND(ID_ZOOM_CLOSEST, &CImageProcessingView::OnZoomClosest)
 		ON_COMMAND(ID_ZOOM_BI, &CImageProcessingView::OnZoomBi)
 		ON_COMMAND(ID_FFT, &CImageProcessingView::OnFft)
-	ON_COMMAND(ID_IFFT, &CImageProcessingView::OnIfft)
+		ON_COMMAND(ID_IFFT, &CImageProcessingView::OnIfft)
 END_MESSAGE_MAP()
 
 // CImageProcessingView 构造/析构
@@ -1369,10 +1369,10 @@ void CImageProcessingView::OnIfft()
 
 
 	double dTmpOne; // 临时变量 
-	double  dTmpTwo;
+	double dTmpTwo;
 
 	int nTransWidth;
-	int  nTransHeight;
+	int nTransHeight;
 
 	// 计算进行傅立叶变换的宽度 （2的整数次幂） 
 	dTmpOne = log(width) / log(2);
@@ -1380,31 +1380,29 @@ void CImageProcessingView::OnIfft()
 	dTmpTwo = pow(2, dTmpTwo);
 	nTransWidth = (int)dTmpTwo; // 
 
-								// 计算进行傅立叶变换的高度 （2的整数次幂） 
+	// 计算进行傅立叶变换的高度 （2的整数次幂） 
 	dTmpOne = log(height) / log(2);
 	dTmpTwo = ceil(dTmpOne);
 	dTmpTwo = pow(2, dTmpTwo);
 	nTransHeight = (int)dTmpTwo;
 
-	std::complex<double> *t = new std::complex<double>[nTransHeight*nTransWidth];
+	std::complex<double>* t = new std::complex<double>[nTransHeight * nTransWidth];
 
 	CSize fftsize;
 	fftsize = CSize(nTransWidth, nTransHeight);
 
 	newbmp.CreateCDib(fftsize, mybmp[0].m_lpBMIH->biBitCount);
 
-	for (j = 0; j<nTransHeight; j++)
-		for (i = 0; i<nTransWidth; i++)
+	for (j = 0; j < nTransHeight; j++)
+		for (i = 0; i < nTransWidth; i++)
 		{
-
-			int position = j*nTransWidth + i;
-			if (i<width &&j<height)
+			int position = j * nTransWidth + i;
+			if (i < width && j < height)
 			{
 				RGBQUAD color;
 				color = mybmp[0].GetPixel(i, j);
 
-				t[position] = std::complex<double>(color.rgbRed, 0.0);  //赋予强度值
-
+				t[position] = std::complex<double>(color.rgbRed, 0.0); //赋予强度值
 			}
 			else
 			{
@@ -1422,22 +1420,23 @@ void CImageProcessingView::OnIfft()
 	newbmp.CreateCDib(fftsize, mybmp[0].m_lpBMIH->biBitCount);
 
 	double max = 0.0;
-	for (j = 0; j<nTransHeight; j++)
-		for (i = 0; i<nTransWidth; i++)
+	for (j = 0; j < nTransHeight; j++)
+		for (i = 0; i < nTransWidth; i++)
 		{
-			if (max<t[nTransWidth*j + i].real())
-				max = t[nTransWidth*j + i].real();
+			if (max < t[nTransWidth * j + i].real())
+				max = t[nTransWidth * j + i].real();
 		}
 
 
-	for (j = 0; j<nTransHeight; j++)
+	for (j = 0; j < nTransHeight; j++)
 	{
-		for (i = 0; i<nTransWidth; i++)
+		for (i = 0; i < nTransWidth; i++)
 		{
-			if (i<width &&j<height)
+			if (i < width && j < height)
 			{
-
-				int gray = sqrt(t[nTransWidth*j + i].real()*t[nTransWidth*j + i].real() + t[nTransWidth*j + i].imag()*t[nTransWidth*j + i].imag());
+				int gray = sqrt(
+					t[nTransWidth * j + i].real() * t[nTransWidth * j + i].real() + t[nTransWidth * j + i].imag() * t[nTransWidth * j +
+						i].imag());
 				RGBQUAD color;
 				color.rgbBlue = gray * 255 / max;
 				color.rgbGreen = gray * 255 / max;

@@ -69,6 +69,9 @@
     <ClInclude Include="ZoomDlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="MyTracker.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ImageProcessing.cpp">
@@ -117,6 +120,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ZoomDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MyTracker.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
