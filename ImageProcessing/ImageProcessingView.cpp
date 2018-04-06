@@ -389,7 +389,7 @@ void CImageProcessingView::OnMinus()
 	CDib tembmp;
 	CFileDialog FileDlg(TRUE, _T("*.bmp"), "打开相减操作的图片", OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY,
 	                    "image files (*.bmp; *.jpg) |*.bmp;*.jpg|AVI files (*.avi) |*.avi|All Files (*.*)|*.*||", NULL);
-	char title[] = {"Open Image"};
+	char title[] = {"打开图像"};
 	FileDlg.m_ofn.lpstrTitle = title;
 	CFile file;
 	if (FileDlg.DoModal() == IDOK)

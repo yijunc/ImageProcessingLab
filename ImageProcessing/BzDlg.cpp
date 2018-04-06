@@ -29,9 +29,9 @@ void CBzDlg::DoDataExchange(CDataExchange* pDX)
 
 
 BEGIN_MESSAGE_MAP(CBzDlg, CDialog)
-	ON_EN_CHANGE(IDC_EDIT1, &CBzDlg::OnEnChangeEdit1)
-	ON_BN_CLICKED(IDOK, &CBzDlg::OnBnClickedOk)
-	ON_BN_CLICKED(IDCANCEL, &CBzDlg::OnBnClickedCancel)
+		ON_EN_CHANGE(IDC_EDIT1, &CBzDlg::OnEnChangeEdit1)
+		ON_BN_CLICKED(IDOK, &CBzDlg::OnBnClickedOk)
+		ON_BN_CLICKED(IDCANCEL, &CBzDlg::OnBnClickedCancel)
 END_MESSAGE_MAP()
 
 
@@ -41,10 +41,12 @@ END_MESSAGE_MAP()
 void CBzDlg::OnEnChangeEdit1()
 {
 	UpdateData(true);
-	if (threshold < 0) {
+	if (threshold < 0)
+	{
 		threshold = 0;
 	}
-	else if (threshold>255) {
+	else if (threshold > 255)
+	{
 		threshold = 255;
 	}
 	UpdateData(false);
