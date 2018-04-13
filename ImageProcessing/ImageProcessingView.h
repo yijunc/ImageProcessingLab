@@ -84,6 +84,9 @@ public:
 	void IFFT_1D(std::complex<double>* pCFData, std::complex<double>* pCTData, int nLevel);
 	void fourier(std::complex<double>* data, int nTransHeight, int nTransWidth, int isign);
 	afx_msg void OnIfft();
+	afx_msg void OnLinearTrans();
+	afx_msg void OnPowTrans();
+	afx_msg void OnAverage();
 };
 
 #ifndef _DEBUG  // ImageProcessingView.cpp 中的调试版本

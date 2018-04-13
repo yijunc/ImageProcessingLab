@@ -50,6 +50,9 @@ BEGIN_MESSAGE_MAP(CImageProcessingView, CView)
 		ON_COMMAND(ID_ZOOM_BI, &CImageProcessingView::OnZoomBi)
 		ON_COMMAND(ID_FFT, &CImageProcessingView::OnFft)
 		ON_COMMAND(ID_IFFT, &CImageProcessingView::OnIfft)
+		ON_COMMAND(ID_LINEAR_TRANS, &CImageProcessingView::OnLinearTrans)
+		ON_COMMAND(ID_POW_TRANS, &CImageProcessingView::OnPowTrans)
+		ON_COMMAND(ID_AVERAGE, &CImageProcessingView::OnAverage)
 END_MESSAGE_MAP()
 
 // CImageProcessingView 构造/析构
@@ -321,9 +324,9 @@ void CImageProcessingView::OnGray()
 		return;
 	}
 	newbmp.CopyDib(&mybmp[0]);
-	for (int i = 0; i < newbmp.GetDimensions().cx; i++)
+	for (long i = 0; i < newbmp.GetDimensions().cx; i++)
 	{
-		for (int j = 0; j < newbmp.GetDimensions().cy; j++)
+		for (long j = 0; j < newbmp.GetDimensions().cy; j++)
 		{
 			RGBQUAD color = mybmp[0].GetPixel(i, j);
 			BYTE tmp = color.rgbRed * 0.30 + color.rgbGreen * 0.59 + color.rgbBlue * 0.11;
@@ -1447,4 +1450,195 @@ void CImageProcessingView::OnIfft()
 	}
 
 	Invalidate(TRUE);
+}
+
+
+void CImageProcessingView::OnLinearTrans()
+{
+	imageCount = 1;
+
+	if (mybmp[0].IsEmpty())
+	{
+		AfxMessageBox("尚未打开图片！");
+		return;
+	}
+	newbmp.Empty();
+
+	CSize sizeimage = mybmp[0].GetDimensions();
+	newbmp.CreateCDib(sizeimage, mybmp[0].m_lpBMIH->biBitCount);
+
+	// 对图象的象素值进行变换
+	// 每行
+	for (int y = 0; y < sizeimage.cy; y++)
+	{
+		// 每列
+		for (int x = 0; x < sizeimage.cx; x++)
+		{
+			RGBQUAD color;
+			color = mybmp[0].GetPixel(x, y);
+			//s = ag + b
+			double g = color.rgbRed;
+
+			//线性变换参数
+			double a;
+			double b;
+
+			if (g >= 110)
+			{
+				a = 2.0;
+				b = 0;
+				g = a * g + b;
+
+				if (g >= 255)
+					g = 255;
+			}
+			else if (g < 88)
+			{
+				a = 0.3;
+				b = 0;
+				g = a * g + b;
+			}
+
+			else if (g > 88 && g < 100)
+			{
+				a = 0.5;
+				b = 0;
+				g = a * g + b;
+			}
+			else if (g > 100 && g < 110)
+			{
+				a = 1.3;
+				b = 0;
+				g = a * g + b;
+			}
+			color.rgbBlue = (unsigned char)g;
+			color.rgbGreen = (unsigned char)g;
+			color.rgbRed = (unsigned char)g;
+			newbmp.WritePixel(x, y, color);
+		}
+	}
+	Invalidate(TRUE);
+}
+
+void CImageProcessingView::OnPowTrans()
+{
+	imageCount = 1;
+
+	if (mybmp[0].IsEmpty())
+	{
+		AfxMessageBox("尚未打开图片！");
+		return;
+	}
+	newbmp.Empty();
+
+	//灰度化
+	newbmp.CopyDib(&mybmp[0]);
+	for (int i = 0; i < newbmp.GetDimensions().cx; i++)
+	{
+		for (int j = 0; j < newbmp.GetDimensions().cy; j++)
+		{
+			RGBQUAD color = mybmp[0].GetPixel(i, j);
+			BYTE tmp = color.rgbRed * 0.30 + color.rgbGreen * 0.59 + color.rgbBlue * 0.11;
+			color.rgbGreen = tmp;
+			color.rgbBlue = tmp;
+			color.rgbRed = tmp;
+			newbmp.WritePixel(i, j, color);
+			//TRACE("Gray: %d\n", newbmp.GetPixel(i,j).rgbRed);
+		}
+	}
+
+	// 对图象的象素值进行变换
+	// 每行
+	for (int i = 0; i < newbmp.GetDimensions().cx; i++)
+	{
+		for (int j = 0; j < newbmp.GetDimensions().cy; j++)
+		{
+			RGBQUAD color;
+			color = newbmp.GetPixel(i, j);
+			//s = ag + b
+			double g = color.rgbRed;
+			double c = 6.0;
+			double a = 0.7;
+			//TRACE("Before: %lf\n", g);
+			g = c * pow(g, a);
+			//g = c * log(1 + g);
+
+			if (g > 255)
+			{
+				g = 255;
+			}
+			//TRACE("Afther: %lf\n", g);
+
+			color.rgbBlue = (unsigned char)g;
+			color.rgbGreen = (unsigned char)g;
+			color.rgbRed = (unsigned char)g;
+			newbmp.WritePixel(i, j, color);
+		}
+	}
+
+	Invalidate(TRUE);
+}
+
+
+void CImageProcessingView::OnAverage()
+{
+	imageCount = 1;
+	if (mybmp[0].IsEmpty())
+	{
+		AfxMessageBox("您尚未打开图片。");
+		return;
+	}
+	newbmp.CopyDib(&mybmp[0]);
+	for (int i = 0; i < newbmp.GetDimensions().cx; i++)
+	{
+		for (int j = 0; j < newbmp.GetDimensions().cy; j++)
+		{
+			RGBQUAD color = mybmp[0].GetPixel(i, j);
+			BYTE tmp = color.rgbRed * 0.30 + color.rgbGreen * 0.59 + color.rgbBlue * 0.11;
+			color.rgbGreen = tmp;
+			color.rgbBlue = tmp;
+			color.rgbRed = tmp;
+			newbmp.WritePixel(i, j, color);
+		}
+	}
+	CSize mysize;
+	mysize = newbmp.GetDimensions();
+	long x = mysize.cx;
+	long y = mysize.cy;
+	int colcolumn[256];
+	int maxg = 0, ming = 255;
+	memset(colcolumn, 0, sizeof(colcolumn));
+	//统计
+	for (int i = 0; i < y; i++)
+	{
+		for (int j = 0; j < x; j++)
+		{
+			int temp = newbmp.GetPixel(j, i).rgbBlue;
+			colcolumn[temp]++;
+			if (temp > maxg)
+			{
+				maxg = temp;
+			}
+			if (temp < ming)
+			{
+				ming = temp;
+			}
+		}
+	}
+	double range = maxg - ming;
+	//灰度重置
+	for (int i = 0; i < y; i++)
+	{
+		for (int j = 0; j < x; j++)
+		{
+			RGBQUAD color;
+			double tem = newbmp.GetPixel(j, i).rgbBlue - ming;
+			tem = tem / range * 255;
+			color.rgbBlue = (int)(tem + 0.5);
+			color.rgbRed = (int)(tem + 0.5);
+			color.rgbGreen = (int)(tem + 0.5);
+			newbmp.WritePixel(j, i, color);
+		}
+	}
+	Invalidate();
 }

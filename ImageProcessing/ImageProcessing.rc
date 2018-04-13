@@ -235,6 +235,9 @@ BEGIN
         MENUITEM "FFT",                         ID_FFT
         MENUITEM "IFFT",                        ID_IFFT
         MENUITEM SEPARATOR
+        MENUITEM "线性点运算",                       ID_LINEAR_TRANS
+        MENUITEM "非线性运算",                       ID_POW_TRANS
+        MENUITEM "直方图均衡",                       32829
     END
     MENUITEM "关于此软件",                       ID_ABOUT
 END
