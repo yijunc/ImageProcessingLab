@@ -199,13 +199,13 @@ void CImageProcessingView::OnOpen()
 	//为打开文件对话框设置可选中多个图片
 	CFileDialog FileDlg(TRUE, _T("*.bmp"), "",
 	                    OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY | OFN_ALLOWMULTISELECT,
-	                    "image files (*.bmp; *.jpg) |*.bmp;*.jpg|AVI files (*.avi) |*.avi|All Files (*.*)|*.*||", NULL);
+	                    "image files (*.bmp; *.jpg) |*.bmp;*.jpg|AVI files (*.avi) |*.avi|All Files (*.*)|*.*||", nullptr);
 	char title[] = {"打开图像"};
 	FileDlg.m_ofn.lpstrTitle = title;
 	if (FileDlg.DoModal() == IDOK)
 	{
 		POSITION filePos = FileDlg.GetStartPosition();
-		while (filePos != NULL)
+		while (filePos != nullptr)
 		{
 			if (imageCount == MAX_NUM)
 			{
@@ -259,7 +259,7 @@ void CImageProcessingView::OnSave()
 		return;
 	}
 	CFileDialog FileDlg(FALSE, _T("*.bmp"), "处理后图片", OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
-	                    "image files (*.bmp; *.jpg) |*.bmp;*.jpg|AVI files (*.avi) |*.avi|All Files (*.*)|*.*||", NULL);
+	                    "image files (*.bmp; *.jpg) |*.bmp;*.jpg|AVI files (*.avi) |*.avi|All Files (*.*)|*.*||", nullptr);
 	char title[] = {"保存图像"};
 	FileDlg.m_ofn.lpstrTitle = title;
 	CFile file;
@@ -391,7 +391,7 @@ void CImageProcessingView::OnMinus()
 	//打开相减操作的图片
 	CDib tembmp;
 	CFileDialog FileDlg(TRUE, _T("*.bmp"), "打开相减操作的图片", OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY,
-	                    "image files (*.bmp; *.jpg) |*.bmp;*.jpg|AVI files (*.avi) |*.avi|All Files (*.*)|*.*||", NULL);
+	                    "image files (*.bmp; *.jpg) |*.bmp;*.jpg|AVI files (*.avi) |*.avi|All Files (*.*)|*.*||", nullptr);
 	char title[] = {"打开图像"};
 	FileDlg.m_ofn.lpstrTitle = title;
 	CFile file;
@@ -1130,7 +1130,7 @@ void CImageProcessingView::IFFT_2D(std::complex<double>* pCFData, std::complex<d
 		}
 	}
 	delete pCWork;
-	pCWork = NULL;
+	pCWork = nullptr;
 }
 
 /*************************************************************************
@@ -1249,9 +1249,9 @@ void CImageProcessingView::FFT_1D(std::complex<double>* pCTData, std::complex<do
 	delete pCW;
 	delete pCWork1;
 	delete pCWork2;
-	pCW = NULL;
-	pCWork1 = NULL;
-	pCWork2 = NULL;
+	pCW = nullptr;
+	pCWork1 = nullptr;
+	pCWork2 = nullptr;
 }
 
 /*************************************************************************
@@ -1313,7 +1313,7 @@ void CImageProcessingView::IFFT_1D(std::complex<double>* pCFData, std::complex<d
 
 	// 释放内存 
 	delete pCWork;
-	pCWork = NULL;
+	pCWork = nullptr;
 }
 
 //////////////////////////////////////////////////////////////
@@ -1585,7 +1585,7 @@ void CImageProcessingView::OnAverage()
 	imageCount = 1;
 	if (mybmp[0].IsEmpty())
 	{
-		AfxMessageBox("您尚未打开图片。");
+		AfxMessageBox("尚未打开图片！");
 		return;
 	}
 	newbmp.CopyDib(&mybmp[0]);
