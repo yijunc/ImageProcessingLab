@@ -238,6 +238,9 @@ BEGIN
         MENUITEM "线性点运算",                       ID_LINEAR_TRANS
         MENUITEM "非线性运算",                       ID_POW_TRANS
         MENUITEM "直方图均衡",                       32829
+        MENUITEM SEPARATOR
+        MENUITEM "伪色彩（分层）",                     32830
+        MENUITEM "伪色彩（灰度）",                     ID_COLOR_GRAY
     END
     MENUITEM "关于此软件",                       ID_ABOUT
 END

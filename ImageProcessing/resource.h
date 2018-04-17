@@ -154,13 +154,16 @@
 #define ID_32827                        32827
 #define ID_POW_TRANS                    32828
 #define ID_AVERAGE                      32829
+#define ID_COLOR_LEVEL                  32830
+#define ID_32831                        32831
+#define ID_COLOR_GRAY                   32832
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        326
-#define _APS_NEXT_COMMAND_VALUE         32830
+#define _APS_NEXT_COMMAND_VALUE         32833
 #define _APS_NEXT_CONTROL_VALUE         1003
 #define _APS_NEXT_SYMED_VALUE           310
 #endif

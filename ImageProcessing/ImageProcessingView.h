@@ -87,6 +87,8 @@ public:
 	afx_msg void OnLinearTrans();
 	afx_msg void OnPowTrans();
 	afx_msg void OnAverage();
+	afx_msg void OnColorLevel();
+	afx_msg void OnColorGray();
 };
 
 #ifndef _DEBUG  // ImageProcessingView.cpp 中的调试版本

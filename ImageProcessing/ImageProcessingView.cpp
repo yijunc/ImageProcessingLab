@@ -53,6 +53,8 @@ BEGIN_MESSAGE_MAP(CImageProcessingView, CView)
 		ON_COMMAND(ID_LINEAR_TRANS, &CImageProcessingView::OnLinearTrans)
 		ON_COMMAND(ID_POW_TRANS, &CImageProcessingView::OnPowTrans)
 		ON_COMMAND(ID_AVERAGE, &CImageProcessingView::OnAverage)
+		ON_COMMAND(ID_COLOR_LEVEL, &CImageProcessingView::OnColorLevel)
+		ON_COMMAND(ID_COLOR_GRAY, &CImageProcessingView::OnColorGray)
 END_MESSAGE_MAP()
 
 // CImageProcessingView 构造/析构
@@ -1522,7 +1524,6 @@ void CImageProcessingView::OnLinearTrans()
 			newbmp.WritePixel(x, y, color);
 		}
 	}
-
 	Invalidate(TRUE);
 }
 
@@ -1665,5 +1666,84 @@ void CImageProcessingView::OnAverage()
 		}
 	}
 	*/
+	Invalidate(TRUE);
+}
+
+
+void CImageProcessingView::OnColorLevel()
+{
+	int RGBlevel[6][3] =
+	{
+		{255, 127, 127},
+		{142, 219, 255},
+		{178, 255, 182},
+		{255, 248, 140},
+		{237, 155, 255},
+		{155, 255, 226}
+	};
+	double graylevelpixels = 43;
+	OnAverage();
+	CSize mysize;
+	mysize = newbmp.GetDimensions();
+	long x = mysize.cx;
+	long y = mysize.cy;
+	for (int i = 0; i < y; i++)
+	{
+		for (int j = 0; j < x; j++)
+		{
+			RGBQUAD color;
+			double temp = newbmp.GetPixel(j, i).rgbBlue;
+			int colorlevel = (temp / graylevelpixels);
+			//TRACE("%d\n", colorlevel);
+			color.rgbRed = RGBlevel[colorlevel][0];
+			color.rgbGreen = RGBlevel[colorlevel][1];
+			color.rgbBlue = RGBlevel[colorlevel][2];
+			newbmp.WritePixel(j, i, color);
+		}
+	}
+	Invalidate(TRUE);
+}
+
+void CImageProcessingView::OnColorGray()
+{
+	OnGray();
+
+	//图像分为若干个灰度级
+	int graylevel = 7;
+	//随机产生颜色
+	RGBQUAD* color_tab = new RGBQUAD[graylevel];
+	srand((unsigned int)time(NULL));
+	for (int i = 0; i < graylevel; i++)
+	{
+		color_tab[i].rgbBlue = (unsigned char)rand() % 255;
+		color_tab[i].rgbGreen = (unsigned char)rand() % 255;
+		color_tab[i].rgbRed = (unsigned char)rand() % 255;
+	}
+	int min = 1000;
+	int max = 0;
+	// 对图象的象素值进行变换
+	for (int x = 0; x < newbmp.GetDimensions().cx; x++)
+	{
+		for (int y = 0; y < newbmp.GetDimensions().cy; y++)
+		{
+			RGBQUAD color;
+			color = newbmp.GetPixel(x, y);
+			if (color.rgbBlue > max) max = color.rgbBlue;
+
+			if (color.rgbBlue < min) min = color.rgbBlue;
+		}
+	}
+	int step = (max - min) / graylevel;
+	for (int x = 0; x < newbmp.GetDimensions().cx; x++)
+	{
+		for (int y = 0; y < newbmp.GetDimensions().cy; y++)
+		{
+			RGBQUAD color;
+			color = newbmp.GetPixel(x, y);
+
+			int level = (color.rgbBlue - min) / step;
+			newbmp.WritePixel(x, y, color_tab[level]);
+		}
+	}
 	Invalidate(TRUE);
 }
