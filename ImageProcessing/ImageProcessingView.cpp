@@ -1465,58 +1465,64 @@ void CImageProcessingView::OnLinearTrans()
 	newbmp.Empty();
 
 	CSize sizeimage = mybmp[0].GetDimensions();
-	newbmp.CreateCDib(sizeimage, mybmp[0].m_lpBMIH->biBitCount);
+	newbmp.CopyDib(&mybmp[0]);
 
-	// 对图象的象素值进行变换
-	// 每行
+
+	//在第一个区域取两个点(x1,y1)=（109,0）  (x2,y2)=（115,255）
+	float x1 = 109, y1 = 0;
+	float x2 = 115, y2 = 255;
+
+	//计算a1,b1 
+	float a1 = (y1 - y2) * 1.0 / (x1 - x2);
+	float b1 = y1 - a1 * x1;
+
+
+	//在第二个区域取两个点(x11,y11)=（105,0）  (x22,y22)=（115,255）
+	float x11 = 105, y11 = 0;
+	float x22 = 115, y22 = 255;
+
+	//计算a2,b2 
+	float a2 = (y11 - y22) * 1.0 / (x11 - x22);
+	float b2 = y11 - a2 * x11;
+
+	//在第三个区域取两个点(x111,y111)=（91,0）  (x222,y222)=（96,50）
+	float x111 = 91, y111 = 0;
+	float x222 = 96, y222 = 255;
+
+	//计算a3,b3 
+	float a3 = (y111 - y222) * 1.0 / (x111 - x222);
+	float b3 = y111 - a3 * x111;
+
 	for (int y = 0; y < sizeimage.cy; y++)
 	{
-		// 每列
 		for (int x = 0; x < sizeimage.cx; x++)
 		{
 			RGBQUAD color;
-			color = mybmp[0].GetPixel(x, y);
+			color = newbmp.GetPixel(x, y);
 			//s = ag + b
 			double g = color.rgbRed;
 
-			//线性变换参数
-			double a;
-			double b;
+			if (g > x11 && g < x22)
+				g = a2 * g + b2;
+			else if (g > x111 && g < x222)
+				g = 0; //a3 * g + b3;
+			else if (g > x111 && g < x222)
+				g = a1 * g + b1;
 
-			if (g >= 110)
-			{
-				a = 2.0;
-				b = 0;
-				g = a * g + b;
+			else
+				g = (a1 + a2 + a3) / 3 * g + (b1 + b2 + b3) / 3;
 
-				if (g >= 255)
-					g = 255;
-			}
-			else if (g < 88)
-			{
-				a = 0.3;
-				b = 0;
-				g = a * g + b;
-			}
+			if (g > 255) g == 255;
+			if (g < 0) g = 0;
 
-			else if (g > 88 && g < 100)
-			{
-				a = 0.5;
-				b = 0;
-				g = a * g + b;
-			}
-			else if (g > 100 && g < 110)
-			{
-				a = 1.3;
-				b = 0;
-				g = a * g + b;
-			}
+
 			color.rgbBlue = (unsigned char)g;
 			color.rgbGreen = (unsigned char)g;
 			color.rgbRed = (unsigned char)g;
 			newbmp.WritePixel(x, y, color);
 		}
 	}
+
 	Invalidate(TRUE);
 }
 
@@ -1556,6 +1562,7 @@ void CImageProcessingView::OnPowTrans()
 			RGBQUAD color;
 			color = newbmp.GetPixel(i, j);
 			//s = ag + b
+			//TODO:（参数未调）
 			double g = color.rgbRed;
 			double c = 6.0;
 			double a = 0.7;
@@ -1601,8 +1608,8 @@ void CImageProcessingView::OnAverage()
 			newbmp.WritePixel(i, j, color);
 		}
 	}
-	CSize mysize;
-	mysize = newbmp.GetDimensions();
+
+	CSize mysize = newbmp.GetDimensions();
 	long x = mysize.cx;
 	long y = mysize.cy;
 	int colcolumn[256];
@@ -1615,18 +1622,35 @@ void CImageProcessingView::OnAverage()
 		{
 			int temp = newbmp.GetPixel(j, i).rgbBlue;
 			colcolumn[temp]++;
-			if (temp > maxg)
-			{
-				maxg = temp;
-			}
-			if (temp < ming)
-			{
-				ming = temp;
-			}
+			maxg = max(maxg, temp);
+			ming = min(ming, temp);
 		}
 	}
-	double range = maxg - ming;
 	//灰度重置
+	int qzh = 0;
+	int newGrayMapping[256];
+	for (int i = 0; i < 256; i++)
+	{
+		qzh += colcolumn[i];
+		newGrayMapping[i] = (int)(qzh * 1.0 / newbmp.GetDimensions().cx / newbmp.GetDimensions().cy * 255.0 + 0.5);
+	}
+	for (long i = 0; i < y; i++)
+	{
+		// 每行
+		for (long j = 0; j < x; j++)
+		{
+			RGBQUAD color;
+			color = newbmp.GetPixel(j, i);
+			int gray = newGrayMapping[color.rgbBlue];
+			color.rgbBlue = gray;
+			color.rgbGreen = gray;
+			color.rgbRed = gray;
+			newbmp.WritePixel(j, i, color);
+		}
+	}
+
+	/*
+	double range = maxg - ming;
 	for (int i = 0; i < y; i++)
 	{
 		for (int j = 0; j < x; j++)
@@ -1640,5 +1664,6 @@ void CImageProcessingView::OnAverage()
 			newbmp.WritePixel(j, i, color);
 		}
 	}
-	Invalidate();
+	*/
+	Invalidate(TRUE);
 }
