@@ -17,6 +17,7 @@
 #include "AboutBox.h"
 #include "ZoomDlg.h"
 #include <complex>
+#include <algorithm>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -55,6 +56,8 @@ BEGIN_MESSAGE_MAP(CImageProcessingView, CView)
 		ON_COMMAND(ID_AVERAGE, &CImageProcessingView::OnAverage)
 		ON_COMMAND(ID_COLOR_LEVEL, &CImageProcessingView::OnColorLevel)
 		ON_COMMAND(ID_COLOR_GRAY, &CImageProcessingView::OnColorGray)
+		ON_COMMAND(ID_AVERAGE_FILTER, &CImageProcessingView::OnAverageFilter)
+		ON_COMMAND(ID_MID_FILTER, &CImageProcessingView::OnMidFilter)
 END_MESSAGE_MAP()
 
 // CImageProcessingView ¹¹Ôì/Îö¹¹
@@ -1743,6 +1746,82 @@ void CImageProcessingView::OnColorGray()
 
 			int level = (color.rgbBlue - min) / step;
 			newbmp.WritePixel(x, y, color_tab[level]);
+		}
+	}
+	Invalidate(TRUE);
+}
+
+
+void CImageProcessingView::OnAverageFilter()
+{
+	OnGray();
+	CSize mysize;
+	mysize = mybmp[0].GetDimensions();
+	newbmp.CopyDib(&mybmp[0]);
+	int x = mysize.cx;
+	int y = mysize.cy;
+	for (int i = 0; i < y; i++)
+	{
+		for (int j = 0; j < x; j++)
+		{
+			RGBQUAD color;
+			double r = 0;
+			for (int w = -1; w < 2; w++)
+			{
+				for (int k = -1; k < 2; k++)
+				{
+					if (w != 0 || k != 0)
+					{
+						int xx = (j + k + x) % x;
+						int yy = (i + w + y) % y;
+						color = mybmp[0].GetPixel(xx, yy);
+						r += color.rgbRed;
+					}
+				}
+			}
+			color.rgbRed = r / 8.0 + 0.5;
+			color.rgbGreen = r / 8.0 + 0.5;
+			color.rgbBlue = r / 8.0 + 0.5;
+			newbmp.WritePixel(j, i, color);
+		}
+	}
+	Invalidate(TRUE);
+}
+
+
+void CImageProcessingView::OnMidFilter()
+{
+	OnGray();
+	CSize mysize;
+	mysize = mybmp[0].GetDimensions();
+	newbmp.CopyDib(&mybmp[0]);
+	int x = mysize.cx;
+	int y = mysize.cy;
+	for (int i = 0; i < y; i++)
+	{
+		for (int j = 0; j < x; j++)
+		{
+			RGBQUAD color;
+			int temp[9];
+			int co = 0;
+			for (int w = -1; w < 2; w++)
+			{
+				for (int k = -1; k < 2; k++)
+				{
+					if (w != 0 || k != 0)
+					{
+						int xx = (j + k + x) % x;
+						int yy = (i + w + y) % y;
+						color = mybmp[0].GetPixel(xx, yy);
+						temp[co++] = color.rgbRed;
+					}
+				}
+			}
+			std::sort(temp, temp + 9);
+			color.rgbRed = temp[4];
+			color.rgbGreen = temp[4];
+			color.rgbBlue = temp[4];
+			newbmp.WritePixel(j, i, color);
 		}
 	}
 	Invalidate(TRUE);

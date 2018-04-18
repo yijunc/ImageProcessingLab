@@ -1,4 +1,3 @@
-
 // ImageProcessing.cpp : 定义应用程序的类行为。
 //
 
@@ -19,12 +18,12 @@
 // CImageProcessingApp
 
 BEGIN_MESSAGE_MAP(CImageProcessingApp, CWinAppEx)
-	ON_COMMAND(ID_APP_ABOUT, &CImageProcessingApp::OnAppAbout)
-	// 基于文件的标准文档命令
-	ON_COMMAND(ID_FILE_NEW, &CWinAppEx::OnFileNew)
-	ON_COMMAND(ID_FILE_OPEN, &CWinAppEx::OnFileOpen)
-	// 标准打印设置命令
-	ON_COMMAND(ID_FILE_PRINT_SETUP, &CWinAppEx::OnFilePrintSetup)
+		ON_COMMAND(ID_APP_ABOUT, &CImageProcessingApp::OnAppAbout)
+		// 基于文件的标准文档命令
+		ON_COMMAND(ID_FILE_NEW, &CWinAppEx::OnFileNew)
+		ON_COMMAND(ID_FILE_OPEN, &CWinAppEx::OnFileOpen)
+		// 标准打印设置命令
+		ON_COMMAND(ID_FILE_PRINT_SETUP, &CWinAppEx::OnFilePrintSetup)
 END_MESSAGE_MAP()
 
 
@@ -95,7 +94,7 @@ BOOL CImageProcessingApp::InitInstance()
 	// TODO: 应适当修改该字符串，
 	// 例如修改为公司或组织名
 	SetRegistryKey(_T("应用程序向导生成的本地应用程序"));
-	LoadStdProfileSettings(4);  // 加载标准 INI 文件选项(包括 MRU)
+	LoadStdProfileSettings(4); // 加载标准 INI 文件选项(包括 MRU)
 
 
 	InitContextMenuManager();
@@ -106,7 +105,7 @@ BOOL CImageProcessingApp::InitInstance()
 	CMFCToolTipInfo ttParams;
 	ttParams.m_bVislManagerTheme = TRUE;
 	theApp.GetTooltipManager()->SetTooltipParams(AFX_TOOLTIP_TYPE_ALL,
-		RUNTIME_CLASS(CMFCToolTipCtrl), &ttParams);
+	                                             RUNTIME_CLASS(CMFCToolTipCtrl), &ttParams);
 
 	// 注册应用程序的文档模板。  文档模板
 	// 将用作文档、框架窗口和视图之间的连接
@@ -114,7 +113,7 @@ BOOL CImageProcessingApp::InitInstance()
 	pDocTemplate = new CSingleDocTemplate(
 		IDR_MAINFRAME,
 		RUNTIME_CLASS(CImageProcessingDoc),
-		RUNTIME_CLASS(CMainFrame),       // 主 SDI 框架窗口
+		RUNTIME_CLASS(CMainFrame), // 主 SDI 框架窗口
 		RUNTIME_CLASS(CImageProcessingView));
 	if (!pDocTemplate)
 		return FALSE;
@@ -124,7 +123,6 @@ BOOL CImageProcessingApp::InitInstance()
 	// 分析标准 shell 命令、DDE、打开文件操作的命令行
 	CCommandLineInfo cmdInfo;
 	ParseCommandLine(cmdInfo);
-
 
 
 	// 调度在命令行中指定的命令。  如果
@@ -156,17 +154,17 @@ class CAboutDlg : public CDialogEx
 public:
 	CAboutDlg();
 
-// 对话框数据
+	// 对话框数据
 #ifdef AFX_DESIGN_TIME
 	enum { IDD = IDD_ABOUTBOX };
 #endif
 
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV 支持
+	virtual void DoDataExchange(CDataExchange* pDX); // DDX/DDV 支持
 
-// 实现
+	// 实现
 protected:
-	DECLARE_MESSAGE_MAP()
+DECLARE_MESSAGE_MAP()
 public:
 	afx_msg void OnBnClickedOk();
 };
@@ -181,7 +179,7 @@ void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CAboutDlg, CDialogEx)
-	ON_BN_CLICKED(IDOK, &CAboutDlg::OnBnClickedOk)
+		ON_BN_CLICKED(IDOK, &CAboutDlg::OnBnClickedOk)
 END_MESSAGE_MAP()
 
 // 用于运行对话框的应用程序命令
@@ -214,9 +212,6 @@ void CImageProcessingApp::SaveCustomState()
 }
 
 // CImageProcessingApp 消息处理程序
-
-
-
 
 
 void CAboutDlg::OnBnClickedOk()

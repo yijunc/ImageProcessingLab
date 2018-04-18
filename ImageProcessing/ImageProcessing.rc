@@ -241,6 +241,9 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "伪色彩（分层）",                     32830
         MENUITEM "伪色彩（灰度）",                     ID_COLOR_GRAY
+        MENUITEM SEPARATOR
+        MENUITEM "均值滤波",                        ID_AVERAGE_FILTER
+        MENUITEM "中值滤波",                        ID_MID_FILTER
     END
     MENUITEM "关于此软件",                       ID_ABOUT
 END
