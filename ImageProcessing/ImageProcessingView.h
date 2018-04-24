@@ -91,6 +91,7 @@ public:
 	afx_msg void OnColorGray();
 	afx_msg void OnAverageFilter();
 	afx_msg void OnMidFilter();
+	afx_msg void OnGradient();
 };
 
 #ifndef _DEBUG  // ImageProcessingView.cpp 中的调试版本

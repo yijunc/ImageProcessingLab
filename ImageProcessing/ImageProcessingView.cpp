@@ -18,6 +18,7 @@
 #include "ZoomDlg.h"
 #include <complex>
 #include <algorithm>
+#include "GradDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -58,6 +59,7 @@ BEGIN_MESSAGE_MAP(CImageProcessingView, CView)
 		ON_COMMAND(ID_COLOR_GRAY, &CImageProcessingView::OnColorGray)
 		ON_COMMAND(ID_AVERAGE_FILTER, &CImageProcessingView::OnAverageFilter)
 		ON_COMMAND(ID_MID_FILTER, &CImageProcessingView::OnMidFilter)
+		ON_COMMAND(ID_GRADIENT, &CImageProcessingView::OnGradient)
 END_MESSAGE_MAP()
 
 // CImageProcessingView ¹¹Ôì/Îö¹¹
@@ -1826,3 +1828,46 @@ void CImageProcessingView::OnMidFilter()
 	}
 	Invalidate(TRUE);
 }
+
+
+void CImageProcessingView::OnGradient()
+{
+	int threshold;
+	CGradDlg threditdlg;
+	if (threditdlg.DoModal() == IDOK)
+	{
+		threshold = threditdlg.threshold;
+	}
+	else
+	{
+		return;
+	}
+	OnGray();
+	CSize mysize = mybmp[0].GetDimensions();
+	int x = mysize.cx;
+	int y = mysize.cy;
+	RGBQUAD color, color1, color2;
+	for (int i = 0; i < y - 1; i++)
+	{
+		for (int j = 0; j < x - 1; j++)
+		{
+			color = newbmp.GetPixel(j, i);
+			color1 = newbmp.GetPixel(j + 1, i);
+			color2 = newbmp.GetPixel(j, i + 1);
+			int temp = abs(color.rgbRed - color1.rgbRed) + abs(color.rgbRed - color2.rgbRed);
+			if (temp < 255 && temp >= threshold)
+			{
+				color.rgbBlue = temp;
+				color.rgbGreen = temp;
+				color.rgbRed = temp;
+				newbmp.WritePixel(j, i, color);
+			}
+			else
+			{
+				newbmp.WritePixel(j, i, color);
+			}
+		}
+	}
+	Invalidate(TRUE);
+}
+

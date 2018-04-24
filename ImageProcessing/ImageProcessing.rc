@@ -244,6 +244,8 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "均值滤波",                        ID_AVERAGE_FILTER
         MENUITEM "中值滤波",                        ID_MID_FILTER
+        MENUITEM SEPARATOR
+        MENUITEM "梯度锐化",                        ID_GRADIENT
     END
     MENUITEM "关于此软件",                       ID_ABOUT
 END
@@ -411,6 +413,17 @@ BEGIN
     EDITTEXT        IDC_EDIT1,159,56,58,14,ES_AUTOHSCROLL
 END
 
+IDD_SHARP_DLG DIALOGEX 0, 0, 255, 118
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "锐化阈值"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "确定",IDOK,61,97,50,14
+    PUSHBUTTON      "取消",IDCANCEL,147,97,50,14
+    LTEXT           "锐化阈值：",IDC_STATIC,63,52,41,8
+    EDITTEXT        IDC_EDIT1,138,50,77,14,ES_AUTOHSCROLL
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -506,6 +519,14 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 117
     END
+
+    IDD_SHARP_DLG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 248
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 111
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -541,6 +562,11 @@ BEGIN
 END
 
 IDD_ZOOM_DLG AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_SHARP_DLG AFX_DIALOG_LAYOUT
 BEGIN
     0
 END

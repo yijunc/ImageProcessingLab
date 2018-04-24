@@ -93,6 +93,8 @@
 #define IDD_ABOUTBOX1                   319
 #define IDD_ABOUT                       319
 #define IDD_ZOOM_DLG                    321
+#define IDD_DIALOG1                     326
+#define IDD_SHARP_DLG                   326
 #define IDC_EDIT1                       1000
 #define IDC_EDIT2                       1002
 #define ID_32771                        32771
@@ -161,13 +163,15 @@
 #define ID_32834                        32834
 #define ID_AVERAGE_FILTER               32835
 #define ID_MID_FILTER                   32836
+#define ID_32837                        32837
+#define ID_GRADIENT                     32838
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        326
-#define _APS_NEXT_COMMAND_VALUE         32837
+#define _APS_NEXT_RESOURCE_VALUE        328
+#define _APS_NEXT_COMMAND_VALUE         32839
 #define _APS_NEXT_CONTROL_VALUE         1003
 #define _APS_NEXT_SYMED_VALUE           310
 #endif
