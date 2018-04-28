@@ -92,7 +92,13 @@ public:
 	afx_msg void OnAverageFilter();
 	afx_msg void OnMidFilter();
 	afx_msg void OnGradient();
+	void Template(CDib& lpDIBBits, long lWidth, long lHeight, int iTempH, int iTempW, int iTempMX, int iTempMY,
+	              float* fpArray, float fCoef);
 	afx_msg void OnWeightFilter();
+	afx_msg void OnPrewitt();
+	afx_msg void OnSobel();
+	afx_msg void OnLaplacian();
+	afx_msg void OnLog();
 };
 
 #ifndef _DEBUG  // ImageProcessingView.cpp 中的调试版本

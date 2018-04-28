@@ -61,6 +61,10 @@ BEGIN_MESSAGE_MAP(CImageProcessingView, CView)
 		ON_COMMAND(ID_MID_FILTER, &CImageProcessingView::OnMidFilter)
 		ON_COMMAND(ID_GRADIENT, &CImageProcessingView::OnGradient)
 		ON_COMMAND(ID_WEIGHT_FILTER, &CImageProcessingView::OnWeightFilter)
+		ON_COMMAND(ID_PREWITT, &CImageProcessingView::OnPrewitt)
+		ON_COMMAND(ID_SOBEL, &CImageProcessingView::OnSobel)
+		ON_COMMAND(ID_LAPLACIAN, &CImageProcessingView::OnLaplacian)
+		ON_COMMAND(ID_LOG, &CImageProcessingView::OnLog)
 END_MESSAGE_MAP()
 
 // CImageProcessingView ¹¹Ôì/Îö¹¹
@@ -1830,7 +1834,7 @@ void CImageProcessingView::OnMidFilter()
 
 void CImageProcessingView::OnWeightFilter()
 {
-	double	temp[3][3] = { 1.0 / 16,2.0 / 16,1.0 / 16,2.0 / 16,4.0 / 16,2.0 / 16,1.0 / 16,2.0 / 16,1.0 / 16 };
+	double temp[3][3] = {1.0 / 16, 2.0 / 16, 1.0 / 16, 2.0 / 16, 4.0 / 16, 2.0 / 16, 1.0 / 16, 2.0 / 16, 1.0 / 16};
 	OnGray();
 	CSize mysize = mybmp[0].GetDimensions();
 	mybmp[1].CopyDib(&newbmp);
@@ -1845,7 +1849,7 @@ void CImageProcessingView::OnWeightFilter()
 				for (int j = -1; j <= 1; j++)
 				{
 					color = mybmp[1].GetPixel(x + i, y + j);
-					gray += color.rgbRed*temp[i + 1][j + 1];
+					gray += color.rgbRed * temp[i + 1][j + 1];
 				}
 
 			color.rgbBlue = (int)gray;
@@ -1893,9 +1897,174 @@ void CImageProcessingView::OnGradient()
 			}
 			else
 			{
+				color.rgbBlue = 255;
+				color.rgbGreen = 255;
+				color.rgbRed = 255;
 				newbmp.WritePixel(j, i, color);
 			}
 		}
 	}
 	Invalidate(TRUE);
+}
+
+
+void CImageProcessingView::Template(CDib& lpDIBBits, long lWidth, long lHeight, int iTempH, int iTempW, int iTempMX,
+                                    int iTempMY, float* fpArray, float fCoef)
+{
+	CSize sizeimage = lpDIBBits.GetDimensions();
+	newbmp.CreateCDib(sizeimage, lpDIBBits.m_lpBMIH->biBitCount);
+	for (int i = iTempMY; i < lHeight - iTempH + iTempMY + 1; i++)
+	{
+		for (int j = iTempMX; j < lWidth - iTempW + iTempMX + 1; j++)
+		{
+			RGBQUAD color;
+			float fResult = 0;
+			for (int k = 0; k < iTempH; k++)
+			{
+				for (int l = 0; l < iTempW; l++)
+				{
+					color = lpDIBBits.GetPixel(j - iTempMX + l, i - iTempMY + k);
+					fResult += color.rgbRed * fpArray[k * iTempW + 1];
+				}
+			}
+			fResult *= fCoef;
+			fResult = fabs(fResult);
+			if (fResult > 255)
+			{
+				color.rgbGreen = 255;
+				color.rgbBlue = 255;
+				color.rgbRed = 255;
+				newbmp.WritePixel(j, i, color);
+			}
+			else
+			{
+				color.rgbGreen = (unsigned char)(fResult + 0.5);
+				color.rgbBlue = (unsigned char)(fResult + 0.5);
+				color.rgbRed = (unsigned char)(fResult + 0.5);
+				newbmp.WritePixel(j, i, color);
+			}
+		}
+	}
+	lpDIBBits.CopyDib(&newbmp);
+}
+
+
+void CImageProcessingView::OnPrewitt()
+{
+	OnGray();
+	CSize mysize = mybmp[0].GetDimensions();
+	mybmp[1].CopyDib(&newbmp);
+	CDib tmpbmp1, tmpbmp2;
+	tmpbmp1.CreateCDib(mysize, mybmp[1].m_lpBMIH->biBitCount);
+	tmpbmp2.CreateCDib(mysize, mybmp[1].m_lpBMIH->biBitCount);
+	tmpbmp1.CopyDib(&mybmp[1]);
+	tmpbmp2.CopyDib(&mybmp[1]);
+	int x = mysize.cx;
+	int y = mysize.cy;
+	int iTempH = 3;
+	int iTempW = 3;
+	float fTempC = 1.0;
+	int iTempMX = 1;
+	int iTempMY = 1;
+	float aTemplate[9] = {
+		-1.0, -1.0, -1.0, 0, 0, 0, 1.0, 1.0, 1.0
+	};
+	float aTemplate1[9] = {
+		1.0, 0.0, -1.0, 1.0, 0.0, -1.0, 1.0, 0.0, -1.0
+	};
+	Template(tmpbmp1, mysize.cx, mysize.cy, iTempH, iTempW, iTempMX, iTempMY, aTemplate, fTempC);
+	Template(tmpbmp2, mysize.cx, mysize.cy, iTempH, iTempW, iTempMX, iTempMY, aTemplate1, fTempC);
+	for (int i = 0; i < y; i++)
+	{
+		for (int j = 0; j < x; j++)
+		{
+			RGBQUAD color, color1;
+			color = tmpbmp1.GetPixel(j, i);
+			color1 = tmpbmp2.GetPixel(j, i);
+			if (color1.rgbBlue > color.rgbBlue)
+			{
+				newbmp.WritePixel(j, i, color1);
+			}
+			else
+			{
+				newbmp.WritePixel(j, i, color);
+			}
+		}
+	}
+	Invalidate(TRUE);
+}
+
+
+void CImageProcessingView::OnSobel()
+{
+	OnGray();
+	CSize mysize = mybmp[0].GetDimensions();
+	mybmp[1].CopyDib(&newbmp);
+	CDib tmpbmp1, tmpbmp2;
+	tmpbmp1.CreateCDib(mysize, mybmp[1].m_lpBMIH->biBitCount);
+	tmpbmp2.CreateCDib(mysize, mybmp[1].m_lpBMIH->biBitCount);
+	tmpbmp1.CopyDib(&mybmp[1]);
+	tmpbmp2.CopyDib(&mybmp[1]);
+	int x = mysize.cx;
+	int y = mysize.cy;
+	int iTempH = 3;
+	int iTempW = 3;
+	float fTempC = 1.0;
+	int iTempMX = 1;
+	int iTempMY = 1;
+	float aTemplate[9] = {
+		-1.0, -2.0, -1.0, 0.0, 0.0, 0.0, 1.0, 2.0, 1.0
+	};
+	float aTemplate1[9] = {
+		-1.0, 0.0, 1.0, -2.0, 0.0, 2.0, -1.0, 0.0, 1.0
+	};
+	Template(tmpbmp1, mysize.cx, mysize.cy, iTempH, iTempW, iTempMX, iTempMY, aTemplate, fTempC);
+	Template(tmpbmp2, mysize.cx, mysize.cy, iTempH, iTempW, iTempMX, iTempMY, aTemplate1, fTempC);
+	for (int i = 0; i < y; i++)
+	{
+		for (int j = 0; j < x; j++)
+		{
+			RGBQUAD color, color1;
+			color = tmpbmp1.GetPixel(j, i);
+			color1 = tmpbmp2.GetPixel(j, i);
+			if (color1.rgbBlue > color.rgbBlue)
+			{
+				newbmp.WritePixel(j, i, color1);
+			}
+			else
+			{
+				newbmp.WritePixel(j, i, color);
+			}
+		}
+	}
+	Invalidate(TRUE);
+}
+
+
+void CImageProcessingView::OnLaplacian()
+{
+	OnGray();
+	CSize mysize = mybmp[0].GetDimensions();
+	mybmp[1].CopyDib(&newbmp);
+	CDib tmpbmp1;
+	tmpbmp1.CopyDib(&mybmp[1]);
+	int x = mysize.cx;
+	int y = mysize.cy;
+	int iTempH = 3;
+	int iTempW = 3;
+	float fTempC = 1.0;
+	int iTempMX = 1;
+	int iTempMY = 1;
+	float aTemplate[9] = {
+		1,1,1,1,-8,1,1,1,1
+	};
+	Template(tmpbmp1, mysize.cx, mysize.cy, iTempH, iTempW, iTempMX, iTempMY, aTemplate, fTempC);
+	newbmp.CopyDib(&tmpbmp1);
+	Invalidate(TRUE);
+}
+
+
+void CImageProcessingView::OnLog()
+{
+	// TODO: Add your command handler code here
 }
