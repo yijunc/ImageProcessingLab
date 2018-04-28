@@ -54,12 +54,13 @@ BEGIN_MESSAGE_MAP(CImageProcessingView, CView)
 		ON_COMMAND(ID_IFFT, &CImageProcessingView::OnIfft)
 		ON_COMMAND(ID_LINEAR_TRANS, &CImageProcessingView::OnLinearTrans)
 		ON_COMMAND(ID_POW_TRANS, &CImageProcessingView::OnPowTrans)
-		ON_COMMAND(ID_AVERAGE, &CImageProcessingView::OnAverage)
+		ON_COMMAND(ID_AVERAGE, &CImageProcessingView::OnAverageTrans)
 		ON_COMMAND(ID_COLOR_LEVEL, &CImageProcessingView::OnColorLevel)
 		ON_COMMAND(ID_COLOR_GRAY, &CImageProcessingView::OnColorGray)
 		ON_COMMAND(ID_AVERAGE_FILTER, &CImageProcessingView::OnAverageFilter)
 		ON_COMMAND(ID_MID_FILTER, &CImageProcessingView::OnMidFilter)
 		ON_COMMAND(ID_GRADIENT, &CImageProcessingView::OnGradient)
+		ON_COMMAND(ID_WEIGHT_FILTER, &CImageProcessingView::OnWeightFilter)
 END_MESSAGE_MAP()
 
 // CImageProcessingView ¹¹Ôì/Îö¹¹
@@ -1593,7 +1594,7 @@ void CImageProcessingView::OnPowTrans()
 }
 
 
-void CImageProcessingView::OnAverage()
+void CImageProcessingView::OnAverageTrans()
 {
 	imageCount = 1;
 	if (mybmp[0].IsEmpty())
@@ -1687,7 +1688,7 @@ void CImageProcessingView::OnColorLevel()
 		{155, 255, 226}
 	};
 	double graylevelpixels = 43;
-	OnAverage();
+	OnAverageTrans();
 	CSize mysize;
 	mysize = newbmp.GetDimensions();
 	long x = mysize.cx;
@@ -1757,9 +1758,8 @@ void CImageProcessingView::OnColorGray()
 void CImageProcessingView::OnAverageFilter()
 {
 	OnGray();
-	CSize mysize;
-	mysize = mybmp[0].GetDimensions();
-	newbmp.CopyDib(&mybmp[0]);
+	CSize mysize = mybmp[0].GetDimensions();
+	mybmp[1].CopyDib(&newbmp);
 	int x = mysize.cx;
 	int y = mysize.cy;
 	for (int i = 0; i < y; i++)
@@ -1776,7 +1776,7 @@ void CImageProcessingView::OnAverageFilter()
 					{
 						int xx = (j + k + x) % x;
 						int yy = (i + w + y) % y;
-						color = mybmp[0].GetPixel(xx, yy);
+						color = mybmp[1].GetPixel(xx, yy);
 						r += color.rgbRed;
 					}
 				}
@@ -1794,9 +1794,8 @@ void CImageProcessingView::OnAverageFilter()
 void CImageProcessingView::OnMidFilter()
 {
 	OnGray();
-	CSize mysize;
-	mysize = mybmp[0].GetDimensions();
-	newbmp.CopyDib(&mybmp[0]);
+	CSize mysize = mybmp[0].GetDimensions();
+	mybmp[1].CopyDib(&newbmp);
 	int x = mysize.cx;
 	int y = mysize.cy;
 	for (int i = 0; i < y; i++)
@@ -1814,7 +1813,7 @@ void CImageProcessingView::OnMidFilter()
 					{
 						int xx = (j + k + x) % x;
 						int yy = (i + w + y) % y;
-						color = mybmp[0].GetPixel(xx, yy);
+						color = mybmp[1].GetPixel(xx, yy);
 						temp[co++] = color.rgbRed;
 					}
 				}
@@ -1826,6 +1825,36 @@ void CImageProcessingView::OnMidFilter()
 			newbmp.WritePixel(j, i, color);
 		}
 	}
+	Invalidate(TRUE);
+}
+
+void CImageProcessingView::OnWeightFilter()
+{
+	double	temp[3][3] = { 1.0 / 16,2.0 / 16,1.0 / 16,2.0 / 16,4.0 / 16,2.0 / 16,1.0 / 16,2.0 / 16,1.0 / 16 };
+	OnGray();
+	CSize mysize = mybmp[0].GetDimensions();
+	mybmp[1].CopyDib(&newbmp);
+	for (int x = 0 + 1; x < mysize.cx - 1; x++)
+	{
+		for (int y = 0 + 1; y < mysize.cy - 1; y++)
+		{
+			RGBQUAD color;
+
+			double gray = 0;
+			for (int i = -1; i <= 1; i++)
+				for (int j = -1; j <= 1; j++)
+				{
+					color = mybmp[1].GetPixel(x + i, y + j);
+					gray += color.rgbRed*temp[i + 1][j + 1];
+				}
+
+			color.rgbBlue = (int)gray;
+			color.rgbGreen = (int)gray;
+			color.rgbRed = (int)gray;
+			newbmp.WritePixel(x, y, color);
+		}
+	}
+
 	Invalidate(TRUE);
 }
 
@@ -1870,4 +1899,3 @@ void CImageProcessingView::OnGradient()
 	}
 	Invalidate(TRUE);
 }
-

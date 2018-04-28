@@ -86,12 +86,13 @@ public:
 	afx_msg void OnIfft();
 	afx_msg void OnLinearTrans();
 	afx_msg void OnPowTrans();
-	afx_msg void OnAverage();
+	afx_msg void OnAverageTrans();
 	afx_msg void OnColorLevel();
 	afx_msg void OnColorGray();
 	afx_msg void OnAverageFilter();
 	afx_msg void OnMidFilter();
 	afx_msg void OnGradient();
+	afx_msg void OnWeightFilter();
 };
 
 #ifndef _DEBUG  // ImageProcessingView.cpp 中的调试版本

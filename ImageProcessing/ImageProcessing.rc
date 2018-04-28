@@ -244,6 +244,7 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "均值滤波",                        ID_AVERAGE_FILTER
         MENUITEM "中值滤波",                        ID_MID_FILTER
+        MENUITEM "加权滤波",                        ID_WEIGHT_FILTER
         MENUITEM SEPARATOR
         MENUITEM "梯度锐化",                        ID_GRADIENT
     END
