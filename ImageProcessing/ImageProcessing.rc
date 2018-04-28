@@ -250,7 +250,6 @@ BEGIN
         MENUITEM "锐化Prewitt",                   32841
         MENUITEM "锐化Sobel",                     ID_SOBEL
         MENUITEM "锐化Laplacian",                 ID_LAPLACIAN
-        MENUITEM "锐化LOG",                       ID_LOG
     END
     MENUITEM "关于此软件",                       ID_ABOUT
 END

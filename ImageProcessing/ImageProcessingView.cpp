@@ -64,7 +64,6 @@ BEGIN_MESSAGE_MAP(CImageProcessingView, CView)
 		ON_COMMAND(ID_PREWITT, &CImageProcessingView::OnPrewitt)
 		ON_COMMAND(ID_SOBEL, &CImageProcessingView::OnSobel)
 		ON_COMMAND(ID_LAPLACIAN, &CImageProcessingView::OnLaplacian)
-		ON_COMMAND(ID_LOG, &CImageProcessingView::OnLog)
 END_MESSAGE_MAP()
 
 // CImageProcessingView 构造/析构
@@ -1908,8 +1907,8 @@ void CImageProcessingView::OnGradient()
 }
 
 
-void CImageProcessingView::Template(CDib& lpDIBBits, long lWidth, long lHeight, int iTempH, int iTempW, int iTempMX,
-                                    int iTempMY, float* fpArray, float fCoef)
+void CImageProcessingView::TemplateONE(CDib& lpDIBBits, long lWidth, long lHeight, int iTempH, int iTempW, int iTempMX,
+                                       int iTempMY, float* fpArray, float fCoef)
 {
 	CSize sizeimage = lpDIBBits.GetDimensions();
 	newbmp.CreateCDib(sizeimage, lpDIBBits.m_lpBMIH->biBitCount);
@@ -1972,8 +1971,8 @@ void CImageProcessingView::OnPrewitt()
 	float aTemplate1[9] = {
 		1.0, 0.0, -1.0, 1.0, 0.0, -1.0, 1.0, 0.0, -1.0
 	};
-	Template(tmpbmp1, mysize.cx, mysize.cy, iTempH, iTempW, iTempMX, iTempMY, aTemplate, fTempC);
-	Template(tmpbmp2, mysize.cx, mysize.cy, iTempH, iTempW, iTempMX, iTempMY, aTemplate1, fTempC);
+	TemplateONE(tmpbmp1, mysize.cx, mysize.cy, iTempH, iTempW, iTempMX, iTempMY, aTemplate, fTempC);
+	TemplateONE(tmpbmp2, mysize.cx, mysize.cy, iTempH, iTempW, iTempMX, iTempMY, aTemplate1, fTempC);
 	for (int i = 0; i < y; i++)
 	{
 		for (int j = 0; j < x; j++)
@@ -2018,8 +2017,8 @@ void CImageProcessingView::OnSobel()
 	float aTemplate1[9] = {
 		-1.0, 0.0, 1.0, -2.0, 0.0, 2.0, -1.0, 0.0, 1.0
 	};
-	Template(tmpbmp1, mysize.cx, mysize.cy, iTempH, iTempW, iTempMX, iTempMY, aTemplate, fTempC);
-	Template(tmpbmp2, mysize.cx, mysize.cy, iTempH, iTempW, iTempMX, iTempMY, aTemplate1, fTempC);
+	TemplateONE(tmpbmp1, mysize.cx, mysize.cy, iTempH, iTempW, iTempMX, iTempMY, aTemplate, fTempC);
+	TemplateONE(tmpbmp2, mysize.cx, mysize.cy, iTempH, iTempW, iTempMX, iTempMY, aTemplate1, fTempC);
 	for (int i = 0; i < y; i++)
 	{
 		for (int j = 0; j < x; j++)
@@ -2041,10 +2040,52 @@ void CImageProcessingView::OnSobel()
 }
 
 
+void CImageProcessingView::TemplateTWO(CDib& lpDIBBits, long lWidth, long lHeight, int iTempH, int iTempW,
+                                       float* fpArray, float fCoef)
+{
+	CSize sizeimage = lpDIBBits.GetDimensions();
+	newbmp.CreateCDib(sizeimage, lpDIBBits.m_lpBMIH->biBitCount);
+	for (int y = 2; y < sizeimage.cy - 2; y++) // 行(除去边缘几行)
+	{
+		for (int x = 2; x < sizeimage.cx - 2; x++) // 列(除去边缘几列)
+		{
+			RGBQUAD color;
+
+			double fResult = 0;
+
+			for (int j = -2; j <= 2; j++)
+			{
+				for (int i = -2; i <= 2; i++)
+				{
+					color = lpDIBBits.GetPixel(x + i, y + j);
+					fResult += color.rgbRed * fpArray[(i + 2) * 5 + (j + 2)];
+				}
+			}
+
+			fResult = fabs(fResult); // 取绝对值
+			if (fResult > 255)
+			{
+				color.rgbGreen = 255;
+				color.rgbRed = 255;
+				color.rgbBlue = 255;
+			}
+			else if (fResult > 3.5)
+			{
+				color.rgbBlue = fResult;
+				color.rgbRed = fResult;
+				color.rgbGreen = fResult;
+			}
+			newbmp.WritePixel(x, y, color);
+		}
+	}
+	lpDIBBits.CopyDib(&newbmp);
+}
+
 void CImageProcessingView::OnLaplacian()
 {
 	OnGray();
 	CSize mysize = mybmp[0].GetDimensions();
+	// mybmp[0].CopyDib(&newbmp);
 	mybmp[1].CopyDib(&newbmp);
 	CDib tmpbmp1;
 	tmpbmp1.CopyDib(&mybmp[1]);
@@ -2053,18 +2094,35 @@ void CImageProcessingView::OnLaplacian()
 	int iTempH = 3;
 	int iTempW = 3;
 	float fTempC = 1.0;
-	int iTempMX = 1;
-	int iTempMY = 1;
-	float aTemplate[9] = {
-		1,1,1,1,-8,1,1,1,1
-	};
-	Template(tmpbmp1, mysize.cx, mysize.cy, iTempH, iTempW, iTempMX, iTempMY, aTemplate, fTempC);
+	float aTemplate[25]; // 模板数组
+
+	// 设置模板参数
+	aTemplate[0] = -2.0;
+	aTemplate[1] = -4.0;
+	aTemplate[2] = -4.0;
+	aTemplate[3] = -4.0;
+	aTemplate[4] = -2.0;
+	aTemplate[5] = -4.0;
+	aTemplate[6] = 0.0;
+	aTemplate[7] = 8.0;
+	aTemplate[8] = 0.0;
+	aTemplate[9] = -4.0;
+	aTemplate[10] = -4.0;
+	aTemplate[11] = 8.0;
+	aTemplate[12] = 24.0;
+	aTemplate[13] = 8.0;
+	aTemplate[14] = -4.0;
+	aTemplate[15] = -4.0;
+	aTemplate[16] = 0.0;
+	aTemplate[17] = 8.0;
+	aTemplate[18] = 0.0;
+	aTemplate[19] = -4.0;
+	aTemplate[20] = -2.0;
+	aTemplate[21] = -4.0;
+	aTemplate[22] = -4.0;
+	aTemplate[23] = -4.0;
+	aTemplate[24] = -2.0;
+	TemplateTWO(tmpbmp1, mysize.cx, mysize.cy, iTempH, iTempW, aTemplate, fTempC);
 	newbmp.CopyDib(&tmpbmp1);
 	Invalidate(TRUE);
-}
-
-
-void CImageProcessingView::OnLog()
-{
-	// TODO: Add your command handler code here
 }
