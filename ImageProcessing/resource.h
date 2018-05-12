@@ -97,7 +97,10 @@
 #define IDD_SHARP_DLG                   326
 #define IDD_FILER_DLG                   330
 #define IDC_EDIT1                       1000
+#define IDC_EDIT4                       1001
 #define IDC_EDIT2                       1002
+#define IDC_EDIT3                       1003
+#define IDC_EDIT5                       1004
 #define ID_32771                        32771
 #define ID_RED_BLUE                     32772
 #define ID_32773                        32773
@@ -177,14 +180,22 @@
 #define ID_LOG                          32847
 #define ID_32848                        32848
 #define ID_IDEAL                        32849
+#define ID_32850                        32850
+#define ID_BUTTERWORTH                  32851
+#define ID_32852                        32852
+#define ID_GAUSS                        32853
+#define ID_32854                        32854
+#define ID_EXP                          32855
+#define ID_32856                        32856
+#define ID_TI                           32857
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        332
-#define _APS_NEXT_COMMAND_VALUE         32850
-#define _APS_NEXT_CONTROL_VALUE         1003
+#define _APS_NEXT_COMMAND_VALUE         32858
+#define _APS_NEXT_CONTROL_VALUE         1004
 #define _APS_NEXT_SYMED_VALUE           310
 #endif
 #endif

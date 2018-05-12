@@ -252,6 +252,10 @@ BEGIN
         MENUITEM "锐化Laplacian",                 ID_LAPLACIAN
         MENUITEM SEPARATOR
         MENUITEM "理想低通滤波",                      ID_IDEAL
+        MENUITEM "Butterworth滤波",               ID_BUTTERWORTH
+        MENUITEM "高斯滤波",                        ID_GAUSS
+        MENUITEM "指数滤波",                        ID_EXP
+        MENUITEM "梯形滤波",                        ID_TI
     END
     MENUITEM "关于此软件",                       ID_ABOUT
 END
@@ -437,10 +441,16 @@ FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "确认",IDOK,69,113,50,14
     PUSHBUTTON      "取消",IDCANCEL,180,113,50,14
-    LTEXT           "U:",IDC_STATIC,57,59,8,8
-    LTEXT           "V:",IDC_STATIC,166,59,8,8
-    EDITTEXT        IDC_EDIT1,75,56,68,14,ES_AUTOHSCROLL | ES_NUMBER
-    EDITTEXT        IDC_EDIT2,177,56,73,14,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "U:",IDC_STATIC,53,37,8,8
+    LTEXT           "V:",IDC_STATIC,162,37,8,8
+    EDITTEXT        IDC_EDIT1,71,34,68,14,ES_AUTOHSCROLL | ES_NUMBER
+    EDITTEXT        IDC_EDIT2,173,34,73,14,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "N:（巴特沃斯与指数）",IDC_STATIC,75,89,80,8
+    EDITTEXT        IDC_EDIT3,153,86,70,14,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "U1:（梯形）",IDC_STATIC,27,63,44,8
+    LTEXT           "V1:（梯形）",IDC_STATIC,157,63,44,8
+    EDITTEXT        IDC_EDIT4,67,60,68,14,ES_AUTOHSCROLL | ES_NUMBER
+    EDITTEXT        IDC_EDIT5,197,60,73,14,ES_AUTOHSCROLL | ES_NUMBER
 END
 
 

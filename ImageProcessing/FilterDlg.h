@@ -26,4 +26,7 @@ public:
 
 	int u;
 	int v;
+	int n;
+	int u1;
+	int v1;
 };

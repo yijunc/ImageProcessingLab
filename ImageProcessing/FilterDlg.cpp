@@ -25,12 +25,16 @@ void CFilterDlg::DoDataExchange(CDataExchange* pDX)
 	CDialog::DoDataExchange(pDX);
 	DDX_Text(pDX, IDC_EDIT1, u);
 	DDX_Text(pDX, IDC_EDIT2, v);
+	DDX_Text(pDX, IDC_EDIT3, n);
+	DDX_Text(pDX, IDC_EDIT4, u1);
+	DDX_Text(pDX, IDC_EDIT5, v1);
 }
 
 
 BEGIN_MESSAGE_MAP(CFilterDlg, CDialog)
 		ON_BN_CLICKED(IDCANCEL, &CFilterDlg::OnBnClickedCancel)
 		ON_BN_CLICKED(IDOK, &CFilterDlg::OnBnClickedOk)
+	
 END_MESSAGE_MAP()
 
 
@@ -49,3 +53,4 @@ void CFilterDlg::OnBnClickedOk()
 	UpdateData(TRUE);
 	CDialog::OnOK();
 }
+

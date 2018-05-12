@@ -101,6 +101,10 @@ public:
 	                 float* fpArray, float fCoef);
 	afx_msg void OnLaplacian();
 	afx_msg void OnIdeal();
+	afx_msg void OnButterworth();
+	afx_msg void OnGauss();
+	afx_msg void OnExp();
+	afx_msg void OnTi();
 };
 
 #ifndef _DEBUG  // ImageProcessingView.cpp 中的调试版本
