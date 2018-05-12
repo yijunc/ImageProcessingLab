@@ -19,6 +19,7 @@
 #include <complex>
 #include <algorithm>
 #include "GradDlg.h"
+#include "FilterDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -64,6 +65,7 @@ BEGIN_MESSAGE_MAP(CImageProcessingView, CView)
 		ON_COMMAND(ID_PREWITT, &CImageProcessingView::OnPrewitt)
 		ON_COMMAND(ID_SOBEL, &CImageProcessingView::OnSobel)
 		ON_COMMAND(ID_LAPLACIAN, &CImageProcessingView::OnLaplacian)
+		ON_COMMAND(ID_IDEAL, &CImageProcessingView::OnIdeal)
 END_MESSAGE_MAP()
 
 // CImageProcessingView 构造/析构
@@ -2124,5 +2126,148 @@ void CImageProcessingView::OnLaplacian()
 	aTemplate[24] = -2.0;
 	TemplateTWO(tmpbmp1, mysize.cx, mysize.cy, iTempH, iTempW, aTemplate, fTempC);
 	newbmp.CopyDib(&tmpbmp1);
+	Invalidate(TRUE);
+}
+
+
+void CImageProcessingView::OnIdeal()
+{
+	imageCount = 1;
+	if (mybmp[0].IsEmpty())
+	{
+		AfxMessageBox("尚未打开图片！");
+		return;
+	}
+	newbmp.CreateCDib(mybmp[0].GetDimensions(), mybmp[0].m_lpBMIH->biBitCount);
+	CFilterDlg dlg;
+	dlg.DoModal();
+	int u = dlg.u;
+	int v = dlg.v;
+
+	int width = mybmp[0].GetDimensions().cx; //原图象的宽度和高度    
+	int height = mybmp[0].GetDimensions().cy;
+	int i, j;
+	double d0; //中间变量
+
+	////////////////////////////////////////
+	//获取变换尺度	
+	double dTmpOne; // 临时变量 
+	double dTmpTwo;
+
+
+	// 计算进行傅立叶变换的宽度 （2的整数次幂） 
+	dTmpOne = log(width) / log(2);
+	dTmpTwo = ceil(dTmpOne);
+	dTmpTwo = pow(2, dTmpTwo);
+	int nTransWidth = (int)dTmpTwo; // 
+
+	// 计算进行傅立叶变换的高度 （2的整数次幂） 
+	dTmpOne = log(height) / log(2);
+	dTmpTwo = ceil(dTmpOne);
+	dTmpTwo = pow(2, dTmpTwo);
+	int nTransHeight = (int)dTmpTwo;
+
+	std::complex<double>* t = new std::complex<double>[nTransHeight * nTransWidth]; // 分配工作空间 
+	std::complex<double>* H = new std::complex<double>[nTransHeight * nTransWidth]; // 分配工作空间 
+	std::complex<double>* tmp = new std::complex<double>[nTransHeight * nTransWidth]; // 分配工作空间 
+
+
+	d0 = sqrt(u * u + v * v); //计算截止频率d0
+
+	for (j = 0; j < nTransHeight; j++)
+		for (i = 0; i < nTransWidth; i++)
+		{
+			int position = j * nTransWidth + i;
+			if (i < width && j < height)
+			{
+				RGBQUAD color;
+				color = mybmp[0].GetPixel(i, j);
+
+				t[position] = std::complex<double>(color.rgbRed, 0.0);
+
+				//理想高通滤波器
+				if (sqrt((i - nTransWidth / 2) * (i - nTransWidth / 2) + (j - nTransHeight / 2) * (j - nTransHeight / 2)) <= d0)
+					H[position] = std::complex<double>(1.0, 0.0);
+				else
+					H[position] = std::complex<double>(0.0, 0.0);
+			}
+			else
+			{
+				t[position] = std::complex<double>(0.0, 0.0);
+				H[position] = std::complex<double>(0.0, 0.0);
+			}
+		}
+
+	//傅里叶变换
+	fourier(t, nTransHeight, nTransWidth, 1);
+
+	//频谱中心化
+	for (j = 0; j < nTransHeight; j++)
+		for (i = 0; i < nTransWidth; i++)
+		{
+			int position = j * nTransWidth + i;
+
+			int x = i < nTransWidth / 2 ? i + nTransWidth / 2 : i - nTransWidth / 2;
+			int y = j < nTransHeight / 2 ? j + nTransHeight / 2 : j - nTransHeight / 2;
+
+			int position1 = y * nTransWidth + x;
+
+			tmp[position1] = t[position];
+		}
+
+
+	double max = 0.0;
+
+	//滤波
+	for (j = 0; j < nTransHeight * nTransWidth; j++)
+		t[j] = std::complex<double>(tmp[j].real() * H[j].real() - tmp[j].imag() * H[j].imag(),
+		                            tmp[j].real() * H[j].imag() + tmp[j].imag() * H[j].real());
+
+
+	//非中心化
+	for (j = 0; j < nTransHeight; j++)
+		for (i = 0; i < nTransWidth; i++)
+		{
+			int position = j * nTransWidth + i;
+
+			int x = i < nTransWidth / 2 ? i + nTransWidth / 2 : i - nTransWidth / 2;
+			int y = j < nTransHeight / 2 ? j + nTransHeight / 2 : j - nTransHeight / 2;
+
+			int position1 = y * nTransWidth + x;
+
+			tmp[position1] = t[position];
+		}
+
+
+	//傅里叶反变换
+	fourier(tmp, nTransHeight, nTransWidth, -1);
+
+	for (j = 0; j < nTransHeight; j++)
+		for (i = 0; i < nTransWidth; i++)
+		{
+			if (max < tmp[nTransWidth * j + i].real())
+				max = tmp[nTransWidth * j + i].real();
+		}
+
+	for (j = 0; j < nTransHeight; j++)
+	{
+		for (i = 0; i < nTransWidth; i++)
+		{
+			if (i < width && j < height)
+			{
+				int gray = sqrt(tmp[nTransWidth * j + i].real() * tmp[nTransWidth * j + i].real()
+					+ tmp[nTransWidth * j + i].imag() * tmp[nTransWidth * j + i].imag());
+				RGBQUAD color;
+				color.rgbBlue = gray * 255 / max;
+				color.rgbGreen = gray * 255 / max;
+				color.rgbRed = gray * 255 / max;
+				newbmp.WritePixel(i, j, color);
+			}
+		}
+	}
+	delete[] t;
+	delete[] H;
+	delete[] tmp;
+
 	Invalidate(TRUE);
 }

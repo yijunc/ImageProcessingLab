@@ -100,6 +100,7 @@ public:
 	void TemplateTWO(CDib& lpDIBBits, long lWidth, long lHeight, int iTempH, int iTempW,
 	                 float* fpArray, float fCoef);
 	afx_msg void OnLaplacian();
+	afx_msg void OnIdeal();
 };
 
 #ifndef _DEBUG  // ImageProcessingView.cpp 中的调试版本

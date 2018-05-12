@@ -75,6 +75,9 @@
     <ClInclude Include="GradDlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="FilterDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ImageProcessing.cpp">
@@ -129,6 +132,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GradDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FilterDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

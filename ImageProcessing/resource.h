@@ -95,6 +95,7 @@
 #define IDD_ZOOM_DLG                    321
 #define IDD_DIALOG1                     326
 #define IDD_SHARP_DLG                   326
+#define IDD_FILER_DLG                   330
 #define IDC_EDIT1                       1000
 #define IDC_EDIT2                       1002
 #define ID_32771                        32771
@@ -174,13 +175,15 @@
 #define ID_LAPLACIAN                    32845
 #define ID_32846                        32846
 #define ID_LOG                          32847
+#define ID_32848                        32848
+#define ID_IDEAL                        32849
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        328
-#define _APS_NEXT_COMMAND_VALUE         32848
+#define _APS_NEXT_RESOURCE_VALUE        332
+#define _APS_NEXT_COMMAND_VALUE         32850
 #define _APS_NEXT_CONTROL_VALUE         1003
 #define _APS_NEXT_SYMED_VALUE           310
 #endif

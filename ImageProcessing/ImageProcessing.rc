@@ -250,6 +250,8 @@ BEGIN
         MENUITEM "锐化Prewitt",                   32841
         MENUITEM "锐化Sobel",                     ID_SOBEL
         MENUITEM "锐化Laplacian",                 ID_LAPLACIAN
+        MENUITEM SEPARATOR
+        MENUITEM "理想低通滤波",                      ID_IDEAL
     END
     MENUITEM "关于此软件",                       ID_ABOUT
 END
@@ -428,6 +430,19 @@ BEGIN
     EDITTEXT        IDC_EDIT1,138,50,77,14,ES_AUTOHSCROLL
 END
 
+IDD_FILER_DLG DIALOGEX 0, 0, 299, 134
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "频域滤波参数"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "确认",IDOK,69,113,50,14
+    PUSHBUTTON      "取消",IDCANCEL,180,113,50,14
+    LTEXT           "U:",IDC_STATIC,57,59,8,8
+    LTEXT           "V:",IDC_STATIC,166,59,8,8
+    EDITTEXT        IDC_EDIT1,75,56,68,14,ES_AUTOHSCROLL | ES_NUMBER
+    EDITTEXT        IDC_EDIT2,177,56,73,14,ES_AUTOHSCROLL | ES_NUMBER
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -531,6 +546,14 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 111
     END
+
+    IDD_FILER_DLG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 292
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 127
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -571,6 +594,11 @@ BEGIN
 END
 
 IDD_SHARP_DLG AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_FILER_DLG AFX_DIALOG_LAYOUT
 BEGIN
     0
 END
