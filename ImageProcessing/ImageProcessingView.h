@@ -105,6 +105,12 @@ public:
 	afx_msg void OnGauss();
 	afx_msg void OnExp();
 	afx_msg void OnTi();
+	afx_msg void OnSwap();
+	afx_msg void OnIdealHigh();
+	afx_msg void OnButterworthHigh();
+	afx_msg void OnGaussHigh();
+	afx_msg void OnExpHigh();
+	afx_msg void OnTiHigh();
 };
 
 #ifndef _DEBUG  // ImageProcessingView.cpp 中的调试版本

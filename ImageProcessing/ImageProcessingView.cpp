@@ -70,6 +70,12 @@ BEGIN_MESSAGE_MAP(CImageProcessingView, CView)
 		ON_COMMAND(ID_GAUSS, &CImageProcessingView::OnGauss)
 		ON_COMMAND(ID_EXP, &CImageProcessingView::OnExp)
 		ON_COMMAND(ID_TI, &CImageProcessingView::OnTi)
+		ON_COMMAND(ID_SWAP, &CImageProcessingView::OnSwap)
+		ON_COMMAND(ID_IDEAL_HIGH, &CImageProcessingView::OnIdealHigh)
+		ON_COMMAND(ID_BUTTERWORTH_HIGH, &CImageProcessingView::OnButterworthHigh)
+		ON_COMMAND(ID_GAUSS_HIGH, &CImageProcessingView::OnGaussHigh)
+		ON_COMMAND(ID_EXP_HIGH, &CImageProcessingView::OnExpHigh)
+		ON_COMMAND(ID_TI_HIGH, &CImageProcessingView::OnTiHigh)
 END_MESSAGE_MAP()
 
 // CImageProcessingView 构造/析构
@@ -2189,7 +2195,7 @@ void CImageProcessingView::OnIdeal()
 
 				t[position] = std::complex<double>(color.rgbRed, 0.0);
 
-				//理想高通滤波器
+				//理想低通滤波器
 				if (sqrt((i - nTransWidth / 2) * (i - nTransWidth / 2) + (j - nTransHeight / 2) * (j - nTransHeight / 2)) <= d0)
 					H[position] = std::complex<double>(1.0, 0.0);
 				else
@@ -2781,6 +2787,761 @@ void CImageProcessingView::OnTi()
 
 				else if (tmp > d1)
 					H[position] = std::complex<double>(0.0, 0.0);
+				else
+				{
+					double d = tmp;
+					H[position] = (d - d1) / (d0 - d1);
+				}
+			}
+			else
+			{
+				t[position] = std::complex<double>(0.0, 0.0);
+				H[position] = std::complex<double>(0.0, 0.0);
+			}
+		}
+
+	//傅里叶变换
+	fourier(t, nTransHeight, nTransWidth, 1);
+
+	//频谱中心化
+	for (j = 0; j < nTransHeight; j++)
+		for (i = 0; i < nTransWidth; i++)
+		{
+			int position = j * nTransWidth + i;
+
+			int x = i < nTransWidth / 2 ? i + nTransWidth / 2 : i - nTransWidth / 2;
+			int y = j < nTransHeight / 2 ? j + nTransHeight / 2 : j - nTransHeight / 2;
+
+			int position1 = y * nTransWidth + x;
+
+			tmp[position1] = t[position];
+		}
+
+
+	//滤波
+	for (j = 0; j < nTransHeight * nTransWidth; j++)
+		t[j] = std::complex<double>(tmp[j].real() * H[j].real() - tmp[j].imag() * H[j].imag(),
+		                            tmp[j].real() * H[j].imag() + tmp[j].imag() * H[j].real());
+
+
+	//非中心化
+	for (j = 0; j < nTransHeight; j++)
+		for (i = 0; i < nTransWidth; i++)
+		{
+			int position = j * nTransWidth + i;
+
+			int x = i < nTransWidth / 2 ? i + nTransWidth / 2 : i - nTransWidth / 2;
+			int y = j < nTransHeight / 2 ? j + nTransHeight / 2 : j - nTransHeight / 2;
+
+			int position1 = y * nTransWidth + x;
+
+			tmp[position1] = t[position];
+		}
+
+
+	//傅里叶反变换
+	fourier(tmp, nTransHeight, nTransWidth, -1);
+
+	for (j = 0; j < nTransHeight; j++)
+		for (i = 0; i < nTransWidth; i++)
+		{
+			if (max < tmp[nTransWidth * j + i].real())
+				max = tmp[nTransWidth * j + i].real();
+		}
+
+	//////////////////////////////////////////
+
+	for (j = 0; j < nTransHeight; j++)
+	{
+		for (i = 0; i < nTransWidth; i++)
+		{
+			if (i < width && j < height)
+			{
+				int gray = sqrt(
+					tmp[nTransWidth * j + i].real() * tmp[nTransWidth * j + i].real() + tmp[nTransWidth * j + i].imag() * tmp[
+						nTransWidth * j + i].imag());
+				RGBQUAD color;
+				color.rgbBlue = gray * 255 / max;
+				color.rgbGreen = gray * 255 / max;
+				color.rgbRed = gray * 255 / max;
+				newbmp.WritePixel(i, j, color);
+			}
+		}
+	}
+	delete[] t;
+	delete[] H;
+	delete[] tmp;
+
+	Invalidate(TRUE);
+}
+
+
+void CImageProcessingView::OnSwap()
+{
+	if (mybmp[0].IsEmpty() || newbmp.IsEmpty())
+	{
+		AfxMessageBox("无可执行操作");
+		return;
+	}
+	imageCount = 1;
+	mybmp[0].CopyDib(&newbmp);
+	newbmp.Empty();
+	Invalidate(TRUE);
+}
+
+
+void CImageProcessingView::OnIdealHigh()
+{
+	imageCount = 1;
+	if (mybmp[0].IsEmpty())
+	{
+		AfxMessageBox("尚未打开图片！");
+		return;
+	}
+	newbmp.CreateCDib(mybmp[0].GetDimensions(), mybmp[0].m_lpBMIH->biBitCount);
+	CFilterDlg dlg;
+	dlg.DoModal();
+	int u = dlg.u;
+	int v = dlg.v;
+
+	int width = mybmp[0].GetDimensions().cx; //原图象的宽度和高度    
+	int height = mybmp[0].GetDimensions().cy;
+	int i, j;
+	double d0; //中间变量
+
+
+	double dTmpOne; // 临时变量 
+	double dTmpTwo;
+
+
+	// 计算进行傅立叶变换的宽度 （2的整数次幂） 
+	dTmpOne = log(width) / log(2);
+	dTmpTwo = ceil(dTmpOne);
+	dTmpTwo = pow(2, dTmpTwo);
+	int nTransWidth = (int)dTmpTwo; // 
+
+	// 计算进行傅立叶变换的高度 （2的整数次幂） 
+	dTmpOne = log(height) / log(2);
+	dTmpTwo = ceil(dTmpOne);
+	dTmpTwo = pow(2, dTmpTwo);
+	int nTransHeight = (int)dTmpTwo;
+
+
+	////////////////////////////////////////
+	using namespace std;
+
+	complex<double>* t = new complex<double>[nTransHeight * nTransWidth]; // 分配工作空间 
+	complex<double>* H = new complex<double>[nTransHeight * nTransWidth]; // 分配工作空间 
+	complex<double>* tmp = new complex<double>[nTransHeight * nTransWidth]; // 分配工作空间 
+
+
+	d0 = sqrt(u * u + v * v); //计算截止频率d0
+
+	for (j = 0; j < nTransHeight; j++)
+		for (i = 0; i < nTransWidth; i++)
+		{
+			int position = j * nTransWidth + i;
+			if (i < width && j < height)
+			{
+				RGBQUAD color;
+				color = mybmp[0].GetPixel(i, j);
+
+				t[position] = complex<double>(color.rgbRed, 0.0); //赋予强度值
+
+
+				if (sqrt((i - nTransWidth / 2) * (i - nTransWidth / 2) + (j - nTransHeight / 2) * (j - nTransHeight / 2)) <= d0)
+					H[position] = complex<double>(0.0, 0.0);
+				else
+					H[position] = complex<double>(1.0, 0.0);
+			}
+			else
+			{
+				t[position] = complex<double>(0.0, 0.0);
+				H[position] = complex<double>(0.0, 0.0);
+			}
+		}
+
+	//傅里叶变换
+	fourier(t, nTransHeight, nTransWidth, 1);
+
+	for (j = 0; j < nTransHeight; j++)
+		for (i = 0; i < nTransWidth; i++)
+		{
+			int position = j * nTransWidth + i;
+
+			//构造理想滤波器
+			int x = i < nTransWidth / 2 ? i + nTransWidth / 2 : i - nTransWidth / 2;
+			int y = j < nTransHeight / 2 ? j + nTransHeight / 2 : j - nTransHeight / 2;
+
+			int position1 = y * nTransWidth + x;
+
+			tmp[position1] = t[position];
+		}
+
+
+	double max = 0.0;
+
+	for (j = 0; j < nTransHeight * nTransWidth; j++)
+		t[j] = complex<double>(tmp[j].real() * H[j].real() - tmp[j].imag() * H[j].imag(),
+		                       tmp[j].real() * H[j].imag() + tmp[j].imag() * H[j].real());
+
+
+	for (j = 0; j < nTransHeight; j++)
+		for (i = 0; i < nTransWidth; i++)
+		{
+			int position = j * nTransWidth + i;
+
+			//构造理想滤波器
+			int x = i < nTransWidth / 2 ? i + nTransWidth / 2 : i - nTransWidth / 2;
+			int y = j < nTransHeight / 2 ? j + nTransHeight / 2 : j - nTransHeight / 2;
+
+			int position1 = y * nTransWidth + x;
+
+			tmp[position1] = t[position];
+		}
+
+
+	//傅里叶反变换
+	fourier(tmp, nTransHeight, nTransWidth, -1);
+
+	for (j = 0; j < nTransHeight; j++)
+		for (i = 0; i < nTransWidth; i++)
+		{
+			if (max < tmp[nTransWidth * j + i].real())
+				max = tmp[nTransWidth * j + i].real();
+		}
+
+	//////////////////////////////////////////
+
+	for (j = 0; j < nTransHeight; j++)
+	{
+		for (i = 0; i < nTransWidth; i++)
+		{
+			if (i < width && j < height)
+			{
+				int gray = sqrt(
+					tmp[nTransWidth * j + i].real() * tmp[nTransWidth * j + i].real() + tmp[nTransWidth * j + i].imag() * tmp[
+						nTransWidth * j + i].imag());
+				RGBQUAD color;
+				color.rgbBlue = gray * 255 / max;
+				color.rgbGreen = gray * 255 / max;
+				color.rgbRed = gray * 255 / max;
+				newbmp.WritePixel(i, j, color);
+			}
+		}
+	}
+	delete[] t;
+	delete[] H;
+
+
+	Invalidate(TRUE);
+}
+
+
+void CImageProcessingView::OnButterworthHigh()
+{
+	imageCount = 1;
+	if (mybmp[0].IsEmpty())
+	{
+		AfxMessageBox("尚未打开图片！");
+		return;
+	}
+	newbmp.CreateCDib(mybmp[0].GetDimensions(), mybmp[0].m_lpBMIH->biBitCount);
+	CFilterDlg dlg;
+	dlg.DoModal();
+	int u = dlg.u;
+	int v = dlg.v;
+
+	int width = mybmp[0].GetDimensions().cx; //原图象的宽度和高度    
+	int height = mybmp[0].GetDimensions().cy;
+	int i, j;
+	double d0; //中间变量
+	int n = dlg.n;
+
+	////////////////////////////////////////
+	//获取变换尺度	
+	double dTmpOne; // 临时变量 
+	double dTmpTwo;
+
+
+	// 计算进行傅立叶变换的宽度 （2的整数次幂） 
+	dTmpOne = log(width) / log(2);
+	dTmpTwo = ceil(dTmpOne);
+	dTmpTwo = pow(2, dTmpTwo);
+	int nTransWidth = (int)dTmpTwo; // 
+
+	// 计算进行傅立叶变换的高度 （2的整数次幂） 
+	dTmpOne = log(height) / log(2);
+	dTmpTwo = ceil(dTmpOne);
+	dTmpTwo = pow(2, dTmpTwo);
+	int nTransHeight = (int)dTmpTwo;
+
+	std::complex<double>* t = new std::complex<double>[nTransHeight * nTransWidth]; // 分配工作空间 
+	std::complex<double>* H = new std::complex<double>[nTransHeight * nTransWidth]; // 分配工作空间 
+	std::complex<double>* tmp = new std::complex<double>[nTransHeight * nTransWidth]; // 分配工作空间 
+
+
+	d0 = sqrt(u * u + v * v); //计算截止频率d0
+
+	for (j = 0; j < nTransHeight; j++)
+		for (i = 0; i < nTransWidth; i++)
+		{
+			int position = j * nTransWidth + i;
+			if (i < width && j < height)
+			{
+				RGBQUAD color;
+				color = mybmp[0].GetPixel(i, j);
+
+				t[position] = std::complex<double>(color.rgbRed, 0.0); //赋予强度值
+
+
+				double d = sqrt((i - nTransWidth / 2) * (i - nTransWidth / 2) + (j - nTransHeight / 2) * (j - nTransHeight / 2));
+				H[position] = 1 / (1 + (sqrt(2) - 1) * pow((d0 / d), (2 * n)));
+			}
+			else
+			{
+				t[position] = std::complex<double>(0.0, 0.0);
+				H[position] = std::complex<double>(0.0, 0.0);
+			}
+		}
+
+	//傅里叶变换
+	fourier(t, nTransHeight, nTransWidth, 1);
+
+
+	//频谱中心化
+	for (j = 0; j < nTransHeight; j++)
+		for (i = 0; i < nTransWidth; i++)
+		{
+			int position = j * nTransWidth + i;
+
+			int x = i < nTransWidth / 2 ? i + nTransWidth / 2 : i - nTransWidth / 2;
+			int y = j < nTransHeight / 2 ? j + nTransHeight / 2 : j - nTransHeight / 2;
+
+			int position1 = y * nTransWidth + x;
+
+			tmp[position1] = t[position];
+		}
+
+
+	double max = 0.0;
+
+	for (j = 0; j < nTransHeight * nTransWidth; j++)
+		t[j] = std::complex<double>(tmp[j].real() * H[j].real() - tmp[j].imag() * H[j].imag(),
+		                            tmp[j].real() * H[j].imag() + tmp[j].imag() * H[j].real());
+
+
+	//非中心化
+	for (j = 0; j < nTransHeight; j++)
+		for (i = 0; i < nTransWidth; i++)
+		{
+			int position = j * nTransWidth + i;
+
+			int x = i < nTransWidth / 2 ? i + nTransWidth / 2 : i - nTransWidth / 2;
+			int y = j < nTransHeight / 2 ? j + nTransHeight / 2 : j - nTransHeight / 2;
+
+			int position1 = y * nTransWidth + x;
+
+			tmp[position1] = t[position];
+		}
+
+
+	//傅里叶反变换
+	fourier(tmp, nTransHeight, nTransWidth, -1);
+
+	for (j = 0; j < nTransHeight; j++)
+		for (i = 0; i < nTransWidth; i++)
+		{
+			if (max < tmp[nTransWidth * j + i].real())
+				max = tmp[nTransWidth * j + i].real();
+		}
+
+	//////////////////////////////////////////
+
+	for (j = 0; j < nTransHeight; j++)
+	{
+		for (i = 0; i < nTransWidth; i++)
+		{
+			if (i < width && j < height)
+			{
+				int gray = sqrt(
+					tmp[nTransWidth * j + i].real() * tmp[nTransWidth * j + i].real() + tmp[nTransWidth * j + i].imag() * tmp[
+						nTransWidth * j + i].imag());
+				RGBQUAD color;
+				color.rgbBlue = gray * 255 / max;
+				color.rgbGreen = gray * 255 / max;
+				color.rgbRed = gray * 255 / max;
+				newbmp.WritePixel(i, j, color);
+			}
+		}
+	}
+	delete[] t;
+	delete[] H;
+	delete[] tmp;
+
+	Invalidate(TRUE);
+}
+
+
+void CImageProcessingView::OnGaussHigh()
+{
+	imageCount = 1;
+	if (mybmp[0].IsEmpty())
+	{
+		AfxMessageBox("尚未打开图片！");
+		return;
+	}
+	newbmp.CreateCDib(mybmp[0].GetDimensions(), mybmp[0].m_lpBMIH->biBitCount);
+	CFilterDlg dlg;
+	dlg.DoModal();
+	int u = dlg.u;
+	int v = dlg.v;
+
+	int width = mybmp[0].GetDimensions().cx; //原图象的宽度和高度    
+	int height = mybmp[0].GetDimensions().cy;
+	int i, j;
+	double d0, max = 0.0; //中间变量
+
+	////////////////////////////////////////
+	//获取变换尺度	
+	double dTmpOne; // 临时变量  
+	double dTmpTwo;
+
+
+	// 计算进行傅立叶变换的宽度 （2的整数次幂） 
+	dTmpOne = log(width) / log(2);
+	dTmpTwo = ceil(dTmpOne);
+	dTmpTwo = pow(2, dTmpTwo);
+	int nTransWidth = (int)dTmpTwo; // 
+
+	// 计算进行傅立叶变换的高度 （2的整数次幂） 
+	dTmpOne = log(height) / log(2);
+	dTmpTwo = ceil(dTmpOne);
+	dTmpTwo = pow(2, dTmpTwo);
+	int nTransHeight = (int)dTmpTwo;
+
+	std::complex<double>* t = new std::complex<double>[nTransHeight * nTransWidth]; // 分配工作空间 
+	std::complex<double>* H = new std::complex<double>[nTransHeight * nTransWidth]; // 分配工作空间 
+	std::complex<double>* tmp = new std::complex<double>[nTransHeight * nTransWidth]; // 分配工作空间 
+
+
+	d0 = u * u + v * v; //计算截止频率d0
+
+	for (j = 0; j < nTransHeight; j++)
+		for (i = 0; i < nTransWidth; i++)
+		{
+			int position = j * nTransWidth + i;
+			if (i < width && j < height)
+			{
+				RGBQUAD color;
+				color = mybmp[0].GetPixel(i, j);
+
+				t[position] = std::complex<double>(color.rgbRed, 0.0); //赋予强度值
+
+				//构造高斯低通滤波器
+				double d2 = (i - nTransWidth / 2) * (i - nTransWidth / 2) + (j - nTransHeight / 2) * (j - nTransHeight / 2);
+				H[position] = 1 - exp(-d2 / (2 * d0));
+			}
+			else
+			{
+				t[position] = std::complex<double>(0.0, 0.0);
+				H[position] = std::complex<double>(0.0, 0.0);
+			}
+		}
+
+	//傅里叶变换
+	fourier(t, nTransHeight, nTransWidth, 1);
+
+	//频谱中心化
+	for (j = 0; j < nTransHeight; j++)
+		for (i = 0; i < nTransWidth; i++)
+		{
+			int position = j * nTransWidth + i;
+
+			int x = i < nTransWidth / 2 ? i + nTransWidth / 2 : i - nTransWidth / 2;
+			int y = j < nTransHeight / 2 ? j + nTransHeight / 2 : j - nTransHeight / 2;
+
+			int position1 = y * nTransWidth + x;
+
+			tmp[position1] = t[position];
+		}
+
+	//滤波
+
+	for (j = 0; j < nTransHeight * nTransWidth; j++)
+		t[j] = std::complex<double>(tmp[j].real() * H[j].real() - tmp[j].imag() * H[j].imag(),
+		                            tmp[j].real() * H[j].imag() + tmp[j].imag() * H[j].real());
+
+
+	//非中心化
+	for (j = 0; j < nTransHeight; j++)
+		for (i = 0; i < nTransWidth; i++)
+		{
+			int position = j * nTransWidth + i;
+
+			int x = i < nTransWidth / 2 ? i + nTransWidth / 2 : i - nTransWidth / 2;
+			int y = j < nTransHeight / 2 ? j + nTransHeight / 2 : j - nTransHeight / 2;
+
+			int position1 = y * nTransWidth + x;
+
+			tmp[position1] = t[position];
+		}
+
+
+	//傅里叶反变换
+	fourier(tmp, nTransHeight, nTransWidth, -1);
+
+	for (j = 0; j < nTransHeight; j++)
+		for (i = 0; i < nTransWidth; i++)
+		{
+			if (max < tmp[nTransWidth * j + i].real())
+				max = tmp[nTransWidth * j + i].real();
+		}
+
+	//////////////////////////////////////////
+
+	for (j = 0; j < nTransHeight; j++)
+	{
+		for (i = 0; i < nTransWidth; i++)
+		{
+			if (i < width && j < height)
+			{
+				int gray = sqrt(
+					tmp[nTransWidth * j + i].real() * tmp[nTransWidth * j + i].real() + tmp[nTransWidth * j + i].imag() * tmp[
+						nTransWidth * j + i].imag());
+				RGBQUAD color;
+				color.rgbBlue = gray * 255 / max;
+				color.rgbGreen = gray * 255 / max;
+				color.rgbRed = gray * 255 / max;
+				newbmp.WritePixel(i, j, color);
+			}
+		}
+	}
+	delete[] t;
+	delete[] H;
+	delete[] tmp;
+
+	Invalidate(TRUE);
+}
+
+
+void CImageProcessingView::OnExpHigh()
+{
+	imageCount = 1;
+	if (mybmp[0].IsEmpty())
+	{
+		AfxMessageBox("尚未打开图片！");
+		return;
+	}
+	newbmp.CreateCDib(mybmp[0].GetDimensions(), mybmp[0].m_lpBMIH->biBitCount);
+	CFilterDlg dlg;
+	dlg.DoModal();
+	int u = dlg.u;
+	int v = dlg.v;
+
+	int width = mybmp[0].GetDimensions().cx; //原图象的宽度和高度    
+	int height = mybmp[0].GetDimensions().cy;
+	int n = dlg.n;
+
+
+	double d0 = sqrt(u * u + v * v); //计算截止频率d0
+
+	int i, j;
+	double max = 0.0;
+
+	////////////////////////////////////////
+	//获取变换尺度	
+	double dTmpOne; // 临时变量 
+	double dTmpTwo;
+
+
+	// 计算进行傅立叶变换的宽度 （2的整数次幂） 
+	dTmpOne = log(width) / log(2);
+	dTmpTwo = ceil(dTmpOne);
+	dTmpTwo = pow(2, dTmpTwo);
+	int nTransWidth = (int)dTmpTwo; // 
+
+	// 计算进行傅立叶变换的高度 （2的整数次幂） 
+	dTmpOne = log(height) / log(2);
+	dTmpTwo = ceil(dTmpOne);
+	dTmpTwo = pow(2, dTmpTwo);
+	int nTransHeight = (int)dTmpTwo;
+
+	std::complex<double>* t = new std::complex<double>[nTransHeight * nTransWidth]; // 分配工作空间 
+	std::complex<double>* H = new std::complex<double>[nTransHeight * nTransWidth]; // 分配工作空间 
+	std::complex<double>* tmp = new std::complex<double>[nTransHeight * nTransWidth]; // 分配工作空间 
+
+	d0 = sqrt(u * u + v * v); //计算截止频率d0
+
+	for (j = 0; j < nTransHeight; j++)
+		for (i = 0; i < nTransWidth; i++)
+		{
+			int position = j * nTransWidth + i;
+			if (i < width && j < height)
+			{
+				RGBQUAD color;
+				color = mybmp[0].GetPixel(i, j);
+
+				t[position] = std::complex<double>(color.rgbRed, 0.0); //赋予强度值
+
+				//构造指数低通滤波器
+				double d = sqrt((i - nTransWidth / 2) * (i - nTransWidth / 2) + (j - nTransHeight / 2) * (j - nTransHeight / 2));
+				H[position] = std::complex<double>(exp(-0.347 * pow((d0 / d), n)), 0.0);
+			}
+			else
+			{
+				t[position] = std::complex<double>(0.0, 0.0);
+				H[position] = std::complex<double>(0.0, 0.0);
+			}
+		}
+
+	//傅里叶变换
+	fourier(t, nTransHeight, nTransWidth, 1);
+
+
+	//频谱中心化
+	for (j = 0; j < nTransHeight; j++)
+		for (i = 0; i < nTransWidth; i++)
+		{
+			int position = j * nTransWidth + i;
+
+			int x = i < nTransWidth / 2 ? i + nTransWidth / 2 : i - nTransWidth / 2;
+			int y = j < nTransHeight / 2 ? j + nTransHeight / 2 : j - nTransHeight / 2;
+
+			int position1 = y * nTransWidth + x;
+
+			tmp[position1] = t[position];
+		}
+
+
+	//滤波
+	for (j = 0; j < nTransHeight * nTransWidth; j++)
+		t[j] = std::complex<double>(tmp[j].real() * H[j].real() - tmp[j].imag() * H[j].imag(),
+		                            tmp[j].real() * H[j].imag() + tmp[j].imag() * H[j].real());
+
+
+	//非中心化
+	for (j = 0; j < nTransHeight; j++)
+		for (i = 0; i < nTransWidth; i++)
+		{
+			int position = j * nTransWidth + i;
+
+			int x = i < nTransWidth / 2 ? i + nTransWidth / 2 : i - nTransWidth / 2;
+			int y = j < nTransHeight / 2 ? j + nTransHeight / 2 : j - nTransHeight / 2;
+
+			int position1 = y * nTransWidth + x;
+
+			tmp[position1] = t[position];
+		}
+
+
+	//傅里叶反变换
+	fourier(tmp, nTransHeight, nTransWidth, -1);
+
+	for (j = 0; j < nTransHeight; j++)
+		for (i = 0; i < nTransWidth; i++)
+		{
+			if (max < tmp[nTransWidth * j + i].real())
+				max = tmp[nTransWidth * j + i].real();
+		}
+
+	//////////////////////////////////////////
+
+	for (j = 0; j < nTransHeight; j++)
+	{
+		for (i = 0; i < nTransWidth; i++)
+		{
+			if (i < width && j < height)
+			{
+				int gray = sqrt(
+					tmp[nTransWidth * j + i].real() * tmp[nTransWidth * j + i].real() + tmp[nTransWidth * j + i].imag() * tmp[
+						nTransWidth * j + i].imag());
+				RGBQUAD color;
+				color.rgbBlue = gray * 255 / max;
+				color.rgbGreen = gray * 255 / max;
+				color.rgbRed = gray * 255 / max;
+				newbmp.WritePixel(i, j, color);
+			}
+		}
+	}
+	delete[] t;
+	delete[] H;
+	delete[] tmp;
+
+	Invalidate();
+}
+
+
+void CImageProcessingView::OnTiHigh()
+{
+	imageCount = 1;
+	if (mybmp[0].IsEmpty())
+	{
+		AfxMessageBox("尚未打开图片！");
+		return;
+	}
+	newbmp.CreateCDib(mybmp[0].GetDimensions(), mybmp[0].m_lpBMIH->biBitCount);
+	CFilterDlg dlg;
+	dlg.DoModal();
+	int u = dlg.u;
+	int v = dlg.v;
+
+	int width = mybmp[0].GetDimensions().cx; //原图象的宽度和高度    
+	int height = mybmp[0].GetDimensions().cy;
+
+	int u1 = dlg.u1;
+	int v1 = dlg.v1;
+
+	double d0 = sqrt(u * u + v * v); //计算截止频率d0
+	double d1 = sqrt(u1 * u1 + v1 * v1);
+
+
+	double max = 0.0;
+	int i, j;
+
+	////////////////////////////////////////
+	//获取变换尺度	
+	double dTmpOne; // 临时变量 
+	double dTmpTwo;
+
+
+	// 计算进行傅立叶变换的宽度 （2的整数次幂） 
+	dTmpOne = log(width) / log(2);
+	dTmpTwo = ceil(dTmpOne);
+	dTmpTwo = pow(2, dTmpTwo);
+	int nTransWidth = (int)dTmpTwo; // 
+
+	// 计算进行傅立叶变换的高度 （2的整数次幂） 
+	dTmpOne = log(height) / log(2);
+	dTmpTwo = ceil(dTmpOne);
+	dTmpTwo = pow(2, dTmpTwo);
+	int nTransHeight = (int)dTmpTwo;
+
+	std::complex<double>* t = new std::complex<double>[nTransHeight * nTransWidth]; // 分配工作空间 
+	std::complex<double>* H = new std::complex<double>[nTransHeight * nTransWidth]; // 分配工作空间 
+	std::complex<double>* tmp = new std::complex<double>[nTransHeight * nTransWidth]; // 分配工作空间 
+
+	d0 = sqrt(u * u + v * v); //计算截止频率d0
+
+	for (j = 0; j < nTransHeight; j++)
+		for (i = 0; i < nTransWidth; i++)
+		{
+			int position = j * nTransWidth + i;
+			if (i < width && j < height)
+			{
+				RGBQUAD color;
+				color = mybmp[0].GetPixel(i, j);
+
+				t[position] = std::complex<double>(color.rgbRed, 0.0); //赋予强度值
+
+				//构造梯形低通滤波器
+				double tmp = sqrt((i - nTransWidth / 2) * (i - nTransWidth / 2) + (j - nTransHeight / 2) * (j - nTransHeight / 2));
+
+				if (tmp <= d0)
+					H[position] = std::complex<double>(0.0, 0.0);
+
+				else if (tmp > d1)
+					H[position] = std::complex<double>(1.0, 0.0);
 				else
 				{
 					double d = tmp;

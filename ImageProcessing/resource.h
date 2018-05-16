@@ -188,13 +188,30 @@
 #define ID_EXP                          32855
 #define ID_32856                        32856
 #define ID_TI                           32857
+#define ID_32858                        32858
+#define ID_32859                        32859
+#define ID_32860                        32860
+#define ID_32861                        32861
+#define ID_32862                        32862
+#define ID_SWAP                         32863
+#define ID_32864                        32864
+#define ID_32865                        32865
+#define ID_32866                        32866
+#define ID_32867                        32867
+#define ID_32868                        32868
+#define ID_32869                        32869
+#define ID_IDEAL_HIGH                   32870
+#define ID_BUTTERWORTH_HIGH             32871
+#define ID_GAUSS_HIGH                   32872
+#define ID_EXP_HIGH                     32873
+#define ID_TI_HIGH                      32874
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        332
-#define _APS_NEXT_COMMAND_VALUE         32858
+#define _APS_NEXT_COMMAND_VALUE         32875
 #define _APS_NEXT_CONTROL_VALUE         1004
 #define _APS_NEXT_SYMED_VALUE           310
 #endif

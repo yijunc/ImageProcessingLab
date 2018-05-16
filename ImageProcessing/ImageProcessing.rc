@@ -207,6 +207,7 @@ BEGIN
         MENUITEM "打开图像",                        ID_OPEN
         MENUITEM "保存图像",                        ID_SAVE
         MENUITEM SEPARATOR
+        MENUITEM "SWAP",                        ID_SWAP
     END
     POPUP "图像操作"
     BEGIN
@@ -218,44 +219,74 @@ BEGIN
         MENUITEM "加运算",                         ID_ADD
         MENUITEM "减运算",                         ID_MINUS
         MENUITEM SEPARATOR
-        MENUITEM "平移",                          ID_SHIFT
-        MENUITEM "旋转（后向映射）",                    ID_ROTATE
-        POPUP "镜像"
+        POPUP "空域基础操作"
         BEGIN
-            MENUITEM "水平",                          ID_MIRROR_H
-            MENUITEM "垂直",                          ID_MIRROR_V
+            MENUITEM "平移",                          ID_SHIFT
+            MENUITEM "旋转（后向映射）",                    ID_ROTATE
+            POPUP "镜像"
+            BEGIN
+                MENUITEM "水平",                          ID_MIRROR_H
+                MENUITEM "垂直",                          ID_MIRROR_V
+            END
+            POPUP "缩放"
+            BEGIN
+                MENUITEM "前向映射（最邻近）",                   ID_ZOOM_FORWARD
+                MENUITEM "后向映射（最邻近）",                   ID_ZOOM_CLOSEST
+                MENUITEM "后向映射（双线性）",                   ID_ZOOM_BI
+            END
         END
-        POPUP "缩放"
+        MENUITEM SEPARATOR
+        POPUP "频域基础操作"
         BEGIN
-            MENUITEM "前向映射（最邻近）",                   ID_ZOOM_FORWARD
-            MENUITEM "后向映射（最邻近）",                   ID_ZOOM_CLOSEST
-            MENUITEM "后向映射（双线性）",                   ID_ZOOM_BI
+            MENUITEM "FFT",                         ID_FFT
+            MENUITEM "IFFT",                        ID_IFFT
         END
         MENUITEM SEPARATOR
-        MENUITEM "FFT",                         ID_FFT
-        MENUITEM "IFFT",                        ID_IFFT
+        POPUP "空域增强"
+        BEGIN
+            MENUITEM "线性点运算",                       ID_LINEAR_TRANS
+            MENUITEM "非线性运算",                       ID_POW_TRANS
+            MENUITEM "直方图均衡",                       32829
+        END
         MENUITEM SEPARATOR
-        MENUITEM "线性点运算",                       ID_LINEAR_TRANS
-        MENUITEM "非线性运算",                       ID_POW_TRANS
-        MENUITEM "直方图均衡",                       32829
+        POPUP "伪色彩"
+        BEGIN
+            MENUITEM "伪色彩（分层）",                     32830
+            MENUITEM "伪色彩（灰度）",                     ID_COLOR_GRAY
+        END
         MENUITEM SEPARATOR
-        MENUITEM "伪色彩（分层）",                     32830
-        MENUITEM "伪色彩（灰度）",                     ID_COLOR_GRAY
+        POPUP "空域滤波"
+        BEGIN
+            MENUITEM "加权滤波",                        ID_WEIGHT_FILTER
+            MENUITEM "均值滤波",                        ID_AVERAGE_FILTER
+            MENUITEM "中值滤波",                        ID_MID_FILTER
+        END
         MENUITEM SEPARATOR
-        MENUITEM "均值滤波",                        ID_AVERAGE_FILTER
-        MENUITEM "中值滤波",                        ID_MID_FILTER
-        MENUITEM "加权滤波",                        ID_WEIGHT_FILTER
+        POPUP "空域锐化"
+        BEGIN
+            MENUITEM "梯度锐化",                        ID_GRADIENT
+            MENUITEM "锐化Prewitt",                   32841
+            MENUITEM "锐化Sobel",                     ID_SOBEL
+            MENUITEM "锐化Laplacian",                 ID_LAPLACIAN
+        END
         MENUITEM SEPARATOR
-        MENUITEM "梯度锐化",                        ID_GRADIENT
-        MENUITEM "锐化Prewitt",                   32841
-        MENUITEM "锐化Sobel",                     ID_SOBEL
-        MENUITEM "锐化Laplacian",                 ID_LAPLACIAN
+        POPUP "频域低通"
+        BEGIN
+            MENUITEM "理想低通滤波",                      ID_IDEAL
+            MENUITEM "Butterworth滤波",               ID_BUTTERWORTH
+            MENUITEM "高斯滤波",                        ID_GAUSS
+            MENUITEM "指数滤波",                        ID_EXP
+            MENUITEM "梯形滤波",                        ID_TI
+        END
         MENUITEM SEPARATOR
-        MENUITEM "理想低通滤波",                      ID_IDEAL
-        MENUITEM "Butterworth滤波",               ID_BUTTERWORTH
-        MENUITEM "高斯滤波",                        ID_GAUSS
-        MENUITEM "指数滤波",                        ID_EXP
-        MENUITEM "梯形滤波",                        ID_TI
+        POPUP "频域高通"
+        BEGIN
+            MENUITEM "理想高通滤波",                      ID_IDEAL_HIGH
+            MENUITEM "Butterworth滤波",               ID_BUTTERWORTH_HIGH
+            MENUITEM "高斯滤波",                        ID_GAUSS_HIGH
+            MENUITEM "指数滤波",                        ID_EXP_HIGH
+            MENUITEM "梯形滤波",                        ID_TI_HIGH
+        END
     END
     MENUITEM "关于此软件",                       ID_ABOUT
 END
