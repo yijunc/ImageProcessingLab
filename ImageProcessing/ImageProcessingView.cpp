@@ -222,7 +222,8 @@ void CImageProcessingView::OnOpen()
 	//为打开文件对话框设置可选中多个图片
 	CFileDialog FileDlg(TRUE, _T("*.bmp"), "",
 	                    OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY | OFN_ALLOWMULTISELECT,
-	                    "image files (*.bmp; *.jpg) |*.bmp;*.jpg|AVI files (*.avi) |*.avi|All Files (*.*)|*.*||", nullptr);
+	                    "image files (*.bmp; *.jpg) |*.bmp;*.jpg|AVI files (*.avi) |*.avi|All Files (*.*)|*.*||",
+	                    nullptr);
 	char title[] = {"打开图像"};
 	FileDlg.m_ofn.lpstrTitle = title;
 	if (FileDlg.DoModal() == IDOK)
@@ -282,7 +283,8 @@ void CImageProcessingView::OnSave()
 		return;
 	}
 	CFileDialog FileDlg(FALSE, _T("*.bmp"), "处理后图片", OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
-	                    "image files (*.bmp; *.jpg) |*.bmp;*.jpg|AVI files (*.avi) |*.avi|All Files (*.*)|*.*||", nullptr);
+	                    "image files (*.bmp; *.jpg) |*.bmp;*.jpg|AVI files (*.avi) |*.avi|All Files (*.*)|*.*||",
+	                    nullptr);
 	char title[] = {"保存图像"};
 	FileDlg.m_ofn.lpstrTitle = title;
 	CFile file;
@@ -414,7 +416,8 @@ void CImageProcessingView::OnMinus()
 	//打开相减操作的图片
 	CDib tembmp;
 	CFileDialog FileDlg(TRUE, _T("*.bmp"), "打开相减操作的图片", OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY,
-	                    "image files (*.bmp; *.jpg) |*.bmp;*.jpg|AVI files (*.avi) |*.avi|All Files (*.*)|*.*||", nullptr);
+	                    "image files (*.bmp; *.jpg) |*.bmp;*.jpg|AVI files (*.avi) |*.avi|All Files (*.*)|*.*||",
+	                    nullptr);
 	char title[] = {"打开图像"};
 	FileDlg.m_ofn.lpstrTitle = title;
 	CFile file;
@@ -877,7 +880,8 @@ void CImageProcessingView::OnZoomBi()
 			float cx = x / fXZoomRatio;
 			float cy = y / fYZoomRatio;
 
-			if (((int)(cx) - 1) >= 0 && ((int)(cx) + 1) < sizeDibDisplay[0].cx && ((int)(cy) - 1) >= 0 && ((int)(cy) + 1) <
+			if (((int)(cx) - 1) >= 0 && ((int)(cx) + 1) < sizeDibDisplay[0].cx && ((int)(cy) - 1) >= 0 && ((int)(cy) + 1
+				) <
 				sizeDibDisplay[0].cy)
 			{
 				float u = cx - (int)cx;
@@ -886,13 +890,19 @@ void CImageProcessingView::OnZoomBi()
 				int j = (int)cy;
 
 				int Green = (1 - u) * (1 - v) * mybmp[0].GetPixel(i, j).rgbGreen + (1 - u) * v * mybmp[0]
-				                                                                                 .GetPixel(i, j + 1).rgbGreen
-					+ u * (1 - v) * mybmp[0].GetPixel(i + 1, j).rgbGreen + u * v * mybmp[0].GetPixel(i + 1, j + 1).rgbGreen;
+				                                                                                 .GetPixel(i, j + 1).
+				                                                                                 rgbGreen
+					+ u * (1 - v) * mybmp[0].GetPixel(i + 1, j).rgbGreen + u * v * mybmp[0]
+					                                                               .GetPixel(i + 1, j + 1).rgbGreen;
 
-				int Blue = (1 - u) * (1 - v) * mybmp[0].GetPixel(i, j).rgbBlue + (1 - u) * v * mybmp[0].GetPixel(i, j + 1).rgbBlue
-					+ u * (1 - v) * mybmp[0].GetPixel(i + 1, j).rgbBlue + u * v * mybmp[0].GetPixel(i + 1, j + 1).rgbBlue;
+				int Blue = (1 - u) * (1 - v) * mybmp[0].GetPixel(i, j).rgbBlue + (1 - u) * v * mybmp[0]
+				                                                                               .GetPixel(i, j + 1).
+				                                                                               rgbBlue
+					+ u * (1 - v) * mybmp[0].GetPixel(i + 1, j).rgbBlue + u * v * mybmp[0]
+					                                                              .GetPixel(i + 1, j + 1).rgbBlue;
 
-				int Red = (1 - u) * (1 - v) * mybmp[0].GetPixel(i, j).rgbRed + (1 - u) * v * mybmp[0].GetPixel(i, j + 1).rgbRed
+				int Red = (1 - u) * (1 - v) * mybmp[0].GetPixel(i, j).rgbRed + (1 - u) * v * mybmp[0]
+				                                                                             .GetPixel(i, j + 1).rgbRed
 					+ u * (1 - v) * mybmp[0].GetPixel(i + 1, j).rgbRed + u * v * mybmp[0].GetPixel(i + 1, j + 1).rgbRed;
 
 				color.rgbGreen = Green;
@@ -1461,7 +1471,8 @@ void CImageProcessingView::OnIfft()
 			if (i < width && j < height)
 			{
 				int gray = sqrt(
-					t[nTransWidth * j + i].real() * t[nTransWidth * j + i].real() + t[nTransWidth * j + i].imag() * t[nTransWidth * j +
+					t[nTransWidth * j + i].real() * t[nTransWidth * j + i].real() + t[nTransWidth * j + i].imag() * t[
+						nTransWidth * j +
 						i].imag());
 				RGBQUAD color;
 				color.rgbBlue = gray * 255 / max;
@@ -1508,9 +1519,9 @@ void CImageProcessingView::OnLinearTrans()
 	float a2 = (y11 - y22) * 1.0 / (x11 - x22);
 	float b2 = y11 - a2 * x11;
 
-	//在第三个区域取两个点(x111,y111)=（91,0）  (x222,y222)=（96,50）
+	//在第三个区域取两个点(x111,y111)=（91,0）  (x222,y222)=（96,20）
 	float x111 = 91, y111 = 0;
-	float x222 = 96, y222 = 255;
+	float x222 = 96, y222 = 0;
 
 	//计算a3,b3 
 	float a3 = (y111 - y222) * 1.0 / (x111 - x222);
@@ -1528,14 +1539,13 @@ void CImageProcessingView::OnLinearTrans()
 			if (g > x11 && g < x22)
 				g = a2 * g + b2;
 			else if (g > x111 && g < x222)
-				g = 0; //a3 * g + b3;
-			else if (g > x111 && g < x222)
+				g = a3 * g + b3;
+			else if (g > x1 && g < x2)
 				g = a1 * g + b1;
-
 			else
 				g = (a1 + a2 + a3) / 3 * g + (b1 + b2 + b3) / 3;
 
-			if (g > 255) g == 255;
+			if (g > 255) g = 255;
 			if (g < 0) g = 0;
 
 
@@ -2196,7 +2206,10 @@ void CImageProcessingView::OnIdeal()
 				t[position] = std::complex<double>(color.rgbRed, 0.0);
 
 				//理想低通滤波器
-				if (sqrt((i - nTransWidth / 2) * (i - nTransWidth / 2) + (j - nTransHeight / 2) * (j - nTransHeight / 2)) <= d0)
+				if (sqrt(
+						(i - nTransWidth / 2) * (i - nTransWidth / 2) + (j - nTransHeight / 2) * (j - nTransHeight / 2))
+					<=
+					d0)
 					H[position] = std::complex<double>(1.0, 0.0);
 				else
 					H[position] = std::complex<double>(0.0, 0.0);
@@ -2340,7 +2353,8 @@ void CImageProcessingView::OnButterworth()
 				t[position] = std::complex<double>(color.rgbRed, 0.0); //赋予强度值
 
 
-				double d = sqrt((i - nTransWidth / 2) * (i - nTransWidth / 2) + (j - nTransHeight / 2) * (j - nTransHeight / 2));
+				double d = sqrt(
+					(i - nTransWidth / 2) * (i - nTransWidth / 2) + (j - nTransHeight / 2) * (j - nTransHeight / 2));
 				H[position] = 1 / (1 + (sqrt(2) - 1) * pow((d / d0), (2 * n)));
 			}
 			else
@@ -2410,7 +2424,8 @@ void CImageProcessingView::OnButterworth()
 			if (i < width && j < height)
 			{
 				int gray = sqrt(
-					tmp[nTransWidth * j + i].real() * tmp[nTransWidth * j + i].real() + tmp[nTransWidth * j + i].imag() * tmp[
+					tmp[nTransWidth * j + i].real() * tmp[nTransWidth * j + i].real() + tmp[nTransWidth * j + i].imag()
+					* tmp[
 						nTransWidth * j + i].imag());
 				RGBQUAD color;
 				color.rgbBlue = gray * 255 / max;
@@ -2484,7 +2499,8 @@ void CImageProcessingView::OnGauss()
 				t[position] = std::complex<double>(color.rgbRed, 0.0); //赋予强度值
 
 				//构造高斯低通滤波器
-				double d2 = (i - nTransWidth / 2) * (i - nTransWidth / 2) + (j - nTransHeight / 2) * (j - nTransHeight / 2);
+				double d2 = (i - nTransWidth / 2) * (i - nTransWidth / 2) + (j - nTransHeight / 2) * (j - nTransHeight /
+					2);
 				H[position] = exp(-d2 / (2 * d0));
 			}
 			else
@@ -2552,7 +2568,8 @@ void CImageProcessingView::OnGauss()
 			if (i < width && j < height)
 			{
 				int gray = sqrt(
-					tmp[nTransWidth * j + i].real() * tmp[nTransWidth * j + i].real() + tmp[nTransWidth * j + i].imag() * tmp[
+					tmp[nTransWidth * j + i].real() * tmp[nTransWidth * j + i].real() + tmp[nTransWidth * j + i].imag()
+					* tmp[
 						nTransWidth * j + i].imag());
 				RGBQUAD color;
 				color.rgbBlue = gray * 255 / max;
@@ -2630,7 +2647,8 @@ void CImageProcessingView::OnExp()
 				t[position] = std::complex<double>(color.rgbRed, 0.0); //赋予强度值
 
 				//构造指数低通滤波器
-				double d = sqrt((i - nTransWidth / 2) * (i - nTransWidth / 2) + (j - nTransHeight / 2) * (j - nTransHeight / 2));
+				double d = sqrt(
+					(i - nTransWidth / 2) * (i - nTransWidth / 2) + (j - nTransHeight / 2) * (j - nTransHeight / 2));
 				H[position] = std::complex<double>(exp(-0.347 * pow((d / d0), n)), 0.0);
 			}
 			else
@@ -2699,7 +2717,8 @@ void CImageProcessingView::OnExp()
 			if (i < width && j < height)
 			{
 				int gray = sqrt(
-					tmp[nTransWidth * j + i].real() * tmp[nTransWidth * j + i].real() + tmp[nTransWidth * j + i].imag() * tmp[
+					tmp[nTransWidth * j + i].real() * tmp[nTransWidth * j + i].real() + tmp[nTransWidth * j + i].imag()
+					* tmp[
 						nTransWidth * j + i].imag());
 				RGBQUAD color;
 				color.rgbBlue = gray * 255 / max;
@@ -2780,7 +2799,8 @@ void CImageProcessingView::OnTi()
 				t[position] = std::complex<double>(color.rgbRed, 0.0); //赋予强度值
 
 				//构造梯形低通滤波器
-				double tmp = sqrt((i - nTransWidth / 2) * (i - nTransWidth / 2) + (j - nTransHeight / 2) * (j - nTransHeight / 2));
+				double tmp = sqrt(
+					(i - nTransWidth / 2) * (i - nTransWidth / 2) + (j - nTransHeight / 2) * (j - nTransHeight / 2));
 
 				if (tmp <= d0)
 					H[position] = std::complex<double>(1.0, 0.0);
@@ -2858,7 +2878,8 @@ void CImageProcessingView::OnTi()
 			if (i < width && j < height)
 			{
 				int gray = sqrt(
-					tmp[nTransWidth * j + i].real() * tmp[nTransWidth * j + i].real() + tmp[nTransWidth * j + i].imag() * tmp[
+					tmp[nTransWidth * j + i].real() * tmp[nTransWidth * j + i].real() + tmp[nTransWidth * j + i].imag()
+					* tmp[
 						nTransWidth * j + i].imag());
 				RGBQUAD color;
 				color.rgbBlue = gray * 255 / max;
@@ -2949,7 +2970,10 @@ void CImageProcessingView::OnIdealHigh()
 				t[position] = complex<double>(color.rgbRed, 0.0); //赋予强度值
 
 
-				if (sqrt((i - nTransWidth / 2) * (i - nTransWidth / 2) + (j - nTransHeight / 2) * (j - nTransHeight / 2)) <= d0)
+				if (sqrt(
+						(i - nTransWidth / 2) * (i - nTransWidth / 2) + (j - nTransHeight / 2) * (j - nTransHeight / 2))
+					<=
+					d0)
 					H[position] = complex<double>(0.0, 0.0);
 				else
 					H[position] = complex<double>(1.0, 0.0);
@@ -3020,7 +3044,8 @@ void CImageProcessingView::OnIdealHigh()
 			if (i < width && j < height)
 			{
 				int gray = sqrt(
-					tmp[nTransWidth * j + i].real() * tmp[nTransWidth * j + i].real() + tmp[nTransWidth * j + i].imag() * tmp[
+					tmp[nTransWidth * j + i].real() * tmp[nTransWidth * j + i].real() + tmp[nTransWidth * j + i].imag()
+					* tmp[
 						nTransWidth * j + i].imag());
 				RGBQUAD color;
 				color.rgbBlue = gray * 255 / max;
@@ -3095,7 +3120,8 @@ void CImageProcessingView::OnButterworthHigh()
 				t[position] = std::complex<double>(color.rgbRed, 0.0); //赋予强度值
 
 
-				double d = sqrt((i - nTransWidth / 2) * (i - nTransWidth / 2) + (j - nTransHeight / 2) * (j - nTransHeight / 2));
+				double d = sqrt(
+					(i - nTransWidth / 2) * (i - nTransWidth / 2) + (j - nTransHeight / 2) * (j - nTransHeight / 2));
 				H[position] = 1 / (1 + (sqrt(2) - 1) * pow((d0 / d), (2 * n)));
 			}
 			else
@@ -3165,7 +3191,8 @@ void CImageProcessingView::OnButterworthHigh()
 			if (i < width && j < height)
 			{
 				int gray = sqrt(
-					tmp[nTransWidth * j + i].real() * tmp[nTransWidth * j + i].real() + tmp[nTransWidth * j + i].imag() * tmp[
+					tmp[nTransWidth * j + i].real() * tmp[nTransWidth * j + i].real() + tmp[nTransWidth * j + i].imag()
+					* tmp[
 						nTransWidth * j + i].imag());
 				RGBQUAD color;
 				color.rgbBlue = gray * 255 / max;
@@ -3239,7 +3266,8 @@ void CImageProcessingView::OnGaussHigh()
 				t[position] = std::complex<double>(color.rgbRed, 0.0); //赋予强度值
 
 				//构造高斯低通滤波器
-				double d2 = (i - nTransWidth / 2) * (i - nTransWidth / 2) + (j - nTransHeight / 2) * (j - nTransHeight / 2);
+				double d2 = (i - nTransWidth / 2) * (i - nTransWidth / 2) + (j - nTransHeight / 2) * (j - nTransHeight /
+					2);
 				H[position] = 1 - exp(-d2 / (2 * d0));
 			}
 			else
@@ -3307,7 +3335,8 @@ void CImageProcessingView::OnGaussHigh()
 			if (i < width && j < height)
 			{
 				int gray = sqrt(
-					tmp[nTransWidth * j + i].real() * tmp[nTransWidth * j + i].real() + tmp[nTransWidth * j + i].imag() * tmp[
+					tmp[nTransWidth * j + i].real() * tmp[nTransWidth * j + i].real() + tmp[nTransWidth * j + i].imag()
+					* tmp[
 						nTransWidth * j + i].imag());
 				RGBQUAD color;
 				color.rgbBlue = gray * 255 / max;
@@ -3385,7 +3414,8 @@ void CImageProcessingView::OnExpHigh()
 				t[position] = std::complex<double>(color.rgbRed, 0.0); //赋予强度值
 
 				//构造指数低通滤波器
-				double d = sqrt((i - nTransWidth / 2) * (i - nTransWidth / 2) + (j - nTransHeight / 2) * (j - nTransHeight / 2));
+				double d = sqrt(
+					(i - nTransWidth / 2) * (i - nTransWidth / 2) + (j - nTransHeight / 2) * (j - nTransHeight / 2));
 				H[position] = std::complex<double>(exp(-0.347 * pow((d0 / d), n)), 0.0);
 			}
 			else
@@ -3454,7 +3484,8 @@ void CImageProcessingView::OnExpHigh()
 			if (i < width && j < height)
 			{
 				int gray = sqrt(
-					tmp[nTransWidth * j + i].real() * tmp[nTransWidth * j + i].real() + tmp[nTransWidth * j + i].imag() * tmp[
+					tmp[nTransWidth * j + i].real() * tmp[nTransWidth * j + i].real() + tmp[nTransWidth * j + i].imag()
+					* tmp[
 						nTransWidth * j + i].imag());
 				RGBQUAD color;
 				color.rgbBlue = gray * 255 / max;
@@ -3535,7 +3566,8 @@ void CImageProcessingView::OnTiHigh()
 				t[position] = std::complex<double>(color.rgbRed, 0.0); //赋予强度值
 
 				//构造梯形低通滤波器
-				double tmp = sqrt((i - nTransWidth / 2) * (i - nTransWidth / 2) + (j - nTransHeight / 2) * (j - nTransHeight / 2));
+				double tmp = sqrt(
+					(i - nTransWidth / 2) * (i - nTransWidth / 2) + (j - nTransHeight / 2) * (j - nTransHeight / 2));
 
 				if (tmp <= d0)
 					H[position] = std::complex<double>(0.0, 0.0);
@@ -3613,7 +3645,8 @@ void CImageProcessingView::OnTiHigh()
 			if (i < width && j < height)
 			{
 				int gray = sqrt(
-					tmp[nTransWidth * j + i].real() * tmp[nTransWidth * j + i].real() + tmp[nTransWidth * j + i].imag() * tmp[
+					tmp[nTransWidth * j + i].real() * tmp[nTransWidth * j + i].real() + tmp[nTransWidth * j + i].imag()
+					* tmp[
 						nTransWidth * j + i].imag());
 				RGBQUAD color;
 				color.rgbBlue = gray * 255 / max;
