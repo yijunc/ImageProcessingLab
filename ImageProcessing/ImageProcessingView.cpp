@@ -1596,9 +1596,9 @@ void CImageProcessingView::OnPowTrans()
 			//s = ag + b
 			//TODO:£¨²ÎÊýÎ´µ÷£©
 			double g = color.rgbRed;
-			double c = 6.0;
-			double a = 0.7;
-			//TRACE("Before: %lf\n", g);
+			double c = 0.0000000001;
+			double a = 5.1;
+			TRACE("Before: %lf\n", g);
 			g = c * pow(g, a);
 			//g = c * log(1 + g);
 
@@ -1606,7 +1606,7 @@ void CImageProcessingView::OnPowTrans()
 			{
 				g = 255;
 			}
-			//TRACE("Afther: %lf\n", g);
+			TRACE("Afther: %lf\n", g);
 
 			color.rgbBlue = (unsigned char)g;
 			color.rgbGreen = (unsigned char)g;
