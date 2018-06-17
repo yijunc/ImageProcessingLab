@@ -1908,8 +1908,9 @@ void CImageProcessingView::OnGradient()
 			color = newbmp.GetPixel(j, i);
 			color1 = newbmp.GetPixel(j + 1, i);
 			color2 = newbmp.GetPixel(j, i + 1);
-			int temp = abs(color.rgbRed - color1.rgbRed) + abs(color.rgbRed - color2.rgbRed);
-			if (temp < 255 && temp >= threshold)
+			int temp = sqrt(pow(abs(color.rgbRed - color1.rgbRed), 2) + pow(abs(color.rgbRed - color2.rgbRed), 2));
+			// TRACE("%d\n", temp);
+			if (temp >= threshold)
 			{
 				color.rgbBlue = temp;
 				color.rgbGreen = temp;
@@ -1984,7 +1985,7 @@ void CImageProcessingView::OnPrewitt()
 	int y = mysize.cy;
 	int iTempH = 3;
 	int iTempW = 3;
-	float fTempC = 1.0;
+	float fTempC = 3.0;
 	int iTempMX = 1;
 	int iTempMY = 1;
 	float aTemplate[9] = {
@@ -2063,7 +2064,7 @@ void CImageProcessingView::OnSobel()
 
 
 void CImageProcessingView::TemplateTWO(CDib& lpDIBBits, long lWidth, long lHeight, int iTempH, int iTempW,
-                                       float* fpArray, float fCoef)
+                                       float* fpArray, float fCoef, int threshold)
 {
 	CSize sizeimage = lpDIBBits.GetDimensions();
 	newbmp.CreateCDib(sizeimage, lpDIBBits.m_lpBMIH->biBitCount);
@@ -2091,7 +2092,7 @@ void CImageProcessingView::TemplateTWO(CDib& lpDIBBits, long lWidth, long lHeigh
 				color.rgbRed = 255;
 				color.rgbBlue = 255;
 			}
-			else if (fResult > 3.5)
+			else if (fResult > threshold)
 			{
 				color.rgbBlue = fResult;
 				color.rgbRed = fResult;
@@ -2105,6 +2106,16 @@ void CImageProcessingView::TemplateTWO(CDib& lpDIBBits, long lWidth, long lHeigh
 
 void CImageProcessingView::OnLaplacian()
 {
+	int threshold;
+	CGradDlg threditdlg;
+	if (threditdlg.DoModal() == IDOK)
+	{
+		threshold = threditdlg.threshold;
+	}
+	else
+	{
+		return;
+	}
 	OnGray();
 	CSize mysize = mybmp[0].GetDimensions();
 	// mybmp[0].CopyDib(&newbmp);
@@ -2144,7 +2155,7 @@ void CImageProcessingView::OnLaplacian()
 	aTemplate[22] = -4.0;
 	aTemplate[23] = -4.0;
 	aTemplate[24] = -2.0;
-	TemplateTWO(tmpbmp1, mysize.cx, mysize.cy, iTempH, iTempW, aTemplate, fTempC);
+	TemplateTWO(tmpbmp1, mysize.cx, mysize.cy, iTempH, iTempW, aTemplate, fTempC, threshold);
 	newbmp.CopyDib(&tmpbmp1);
 	Invalidate(TRUE);
 }

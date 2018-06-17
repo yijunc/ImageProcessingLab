@@ -93,12 +93,12 @@ public:
 	afx_msg void OnMidFilter();
 	afx_msg void OnGradient();
 	void TemplateONE(CDib& lpDIBBits, long lWidth, long lHeight, int iTempH, int iTempW, int iTempMX, int iTempMY,
-	              float* fpArray, float fCoef);
+	                 float* fpArray, float fCoef);
 	afx_msg void OnWeightFilter();
 	afx_msg void OnPrewitt();
 	afx_msg void OnSobel();
 	void TemplateTWO(CDib& lpDIBBits, long lWidth, long lHeight, int iTempH, int iTempW,
-	                 float* fpArray, float fCoef);
+	                 float* fpArray, float fCoef, int threshold);
 	afx_msg void OnLaplacian();
 	afx_msg void OnIdeal();
 	afx_msg void OnButterworth();
