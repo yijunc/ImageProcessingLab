@@ -111,6 +111,7 @@ public:
 	afx_msg void OnGaussHigh();
 	afx_msg void OnExpHigh();
 	afx_msg void OnTiHigh();
+	afx_msg void OnMosaic();
 };
 
 #ifndef _DEBUG  // ImageProcessingView.cpp 中的调试版本

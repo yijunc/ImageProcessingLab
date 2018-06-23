@@ -76,6 +76,7 @@ BEGIN_MESSAGE_MAP(CImageProcessingView, CView)
 		ON_COMMAND(ID_GAUSS_HIGH, &CImageProcessingView::OnGaussHigh)
 		ON_COMMAND(ID_EXP_HIGH, &CImageProcessingView::OnExpHigh)
 		ON_COMMAND(ID_TI_HIGH, &CImageProcessingView::OnTiHigh)
+		ON_COMMAND(ID_MOSAIC, &CImageProcessingView::OnMosaic)
 END_MESSAGE_MAP()
 
 // CImageProcessingView 构造/析构
@@ -3671,5 +3672,50 @@ void CImageProcessingView::OnTiHigh()
 	delete[] H;
 	delete[] tmp;
 
+	Invalidate(TRUE);
+}
+
+
+void CImageProcessingView::OnMosaic()
+{
+	imageCount = 1;
+	if (mybmp[0].IsEmpty())
+	{
+		AfxMessageBox("尚未打开图片！");
+		return;
+	}
+	int marksize = 15;
+	newbmp.CreateCDib(mybmp[0].GetDimensions(), mybmp[0].m_lpBMIH->biBitCount);
+	for (int x = (marksize / 2); x < mybmp[0].GetDimensions().cx - 1; x += marksize)
+	{
+		for (int y = (marksize / 2); y < mybmp[0].GetDimensions().cy - 1; y += marksize)
+		{
+			RGBQUAD color;
+			color = mybmp[0].GetPixel(x, y);
+			int r = 0, g = 0, b = 0, num = 0;
+			for (int m1 = -(marksize / 2); m1 <= (marksize / 2); m1++)
+				for (int m2 = -(marksize / 2); m2 <= (marksize / 2); m2++)
+				{
+					if (x + m1 >= mybmp[0].GetDimensions().cx || x + m1 < 0 || y + m2 >= mybmp[0].GetDimensions().cy ||
+						y + m2
+						< 0)
+						continue;
+					num++;
+					RGBQUAD color1;
+					color1 = mybmp[0].GetPixel(x + m1, y + m2);
+					r += color1.rgbRed;
+					g += color1.rgbGreen;
+					b += color1.rgbBlue;
+				}
+			color.rgbRed = (unsigned char)(r * 1.0 / num);
+			color.rgbGreen = (unsigned char)(g * 1.0 / num);
+			color.rgbBlue = (unsigned char)(b * 1.0 / num);
+			for (int m1 = -(marksize / 2); m1 <= (marksize / 2); m1++)
+				for (int m2 = -(marksize / 2); m2 <= (marksize / 2); m2++)
+				{
+					newbmp.WritePixel(x + m1, y + m2, color);
+				}
+		}
+	}
 	Invalidate(TRUE);
 }

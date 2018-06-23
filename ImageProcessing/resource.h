@@ -96,6 +96,7 @@
 #define IDD_DIALOG1                     326
 #define IDD_SHARP_DLG                   326
 #define IDD_FILER_DLG                   330
+#define IDD_DIALOG2                     332
 #define IDC_EDIT1                       1000
 #define IDC_EDIT4                       1001
 #define IDC_EDIT2                       1002
@@ -205,13 +206,16 @@
 #define ID_GAUSS_HIGH                   32872
 #define ID_EXP_HIGH                     32873
 #define ID_TI_HIGH                      32874
+#define ID_32875                        32875
+#define ID_MO                           32876
+#define ID_MOSAIC                       32877
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        332
-#define _APS_NEXT_COMMAND_VALUE         32875
+#define _APS_NEXT_RESOURCE_VALUE        334
+#define _APS_NEXT_COMMAND_VALUE         32878
 #define _APS_NEXT_CONTROL_VALUE         1004
 #define _APS_NEXT_SYMED_VALUE           310
 #endif
