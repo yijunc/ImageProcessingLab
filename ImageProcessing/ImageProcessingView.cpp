@@ -2099,6 +2099,12 @@ void CImageProcessingView::TemplateTWO(CDib& lpDIBBits, long lWidth, long lHeigh
 				color.rgbRed = fResult;
 				color.rgbGreen = fResult;
 			}
+			else
+			{
+				color.rgbBlue = 0;
+				color.rgbRed = 0;
+				color.rgbGreen = 0;
+			}
 			newbmp.WritePixel(x, y, color);
 		}
 	}
@@ -3684,7 +3690,7 @@ void CImageProcessingView::OnMosaic()
 		AfxMessageBox("ÉÐÎ´´ò¿ªÍ¼Æ¬£¡");
 		return;
 	}
-	int marksize = 15;
+	int marksize = 9;
 	newbmp.CreateCDib(mybmp[0].GetDimensions(), mybmp[0].m_lpBMIH->biBitCount);
 	for (int x = (marksize / 2); x < mybmp[0].GetDimensions().cx - 1; x += marksize)
 	{
